@@ -20,7 +20,7 @@ class InvoiceServiceTest(TestCase):
             "state": InvoiceStates.PENDING.value,
         }
 
-        created_invoice = InvoiceService().create(invoice_data)
+        created_invoice = InvoiceService().create_invoice(invoice_data)
 
         self.assertEqual(created_invoice["provider"], "Provider A")
         self.assertEqual(created_invoice["concept"], "Product Purchase")
@@ -42,7 +42,7 @@ class InvoiceServiceTest(TestCase):
             state=InvoiceStates.PENDING.value,
         )
 
-        invoice_data = InvoiceService().find_by_id(invoice.id)
+        invoice_data = InvoiceService().get_invoice(invoice.id)
 
         self.assertEqual(invoice_data["provider"], "Provider A")
         self.assertEqual(invoice_data["concept"], "Product Purchase")
@@ -68,7 +68,7 @@ class InvoiceServiceTest(TestCase):
             "total_value": 130.0,
         }
 
-        updated_invoice = InvoiceService().update(invoice.id, updated_data)
+        updated_invoice = InvoiceService().update_invoice(invoice.id, updated_data)
 
         self.assertEqual(updated_invoice["concept"], "Updated Concept")
         self.assertEqual(float(updated_invoice["total_value"]), 130.0)
@@ -89,7 +89,7 @@ class InvoiceServiceTest(TestCase):
             state=InvoiceStates.PENDING.value,
         )
 
-        response = InvoiceService().delete(invoice.id)
+        response = InvoiceService().delete_invoice(invoice.id)
 
         self.assertEqual(response, {"message": f"Invoice {invoice.id} deleted successfully"})
         self.assertFalse(Invoice.objects.filter(id=invoice.id).exists())
@@ -106,7 +106,7 @@ class InvoiceServiceTest(TestCase):
         }
 
         with self.assertRaises(ValidationError) as context:
-            InvoiceService().create(invalid_invoice_data)
+            InvoiceService().create_invoice(invalid_invoice_data)
 
         self.assertEqual(str(context.exception), "['Invalid invoice state']")
 
@@ -172,9 +172,9 @@ class InvoiceServiceTest(TestCase):
             state=InvoiceStates.PAID.value,
         )
 
-        filtered_by_state = InvoiceService().find_all(state=InvoiceStates.PENDING.value)
+        filtered_by_state = InvoiceService().get_all_invoices(state=InvoiceStates.PENDING.value)
         self.assertEqual(len(filtered_by_state), 1)
 
-        filtered_by_date = InvoiceService().find_all(start_date=date(2025, 2, 1), end_date=date(2025, 2, 28))
+        filtered_by_date = InvoiceService().get_all_invoices(start_date=date(2025, 2, 1), end_date=date(2025, 2, 28))
         self.assertEqual(len(filtered_by_date), 1)
         self.assertEqual(filtered_by_date[0]["date"], "2025-02-08")

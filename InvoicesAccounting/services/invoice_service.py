@@ -6,7 +6,7 @@ from InvoicesAccounting.enum.invoice_states import InvoiceStates
 from InvoicesAccounting.serializers import InvoiceSerializer
 
 class InvoiceService:
-    def create(self, data: dict):
+    def create_invoice(self, data: dict):
         if "state" in data and data["state"] not in [state.value for state in InvoiceStates]:
             raise ValidationError("Invalid invoice state")
 
@@ -21,11 +21,11 @@ class InvoiceService:
         )
         return InvoiceSerializer(invoice).data
 
-    def find_by_id(self, invoice_id: int):
+    def get_invoice(self, invoice_id: int):
         invoice = self._get_or_fail(Invoice, invoice_id)
         return InvoiceSerializer(invoice).data
 
-    def update(self, invoice_id: int, data: dict):
+    def update_invoice(self, invoice_id: int, data: dict):
         invoice = self._get_or_fail(Invoice, invoice_id)
 
         if "state" in data and data["state"] not in [state.value for state in InvoiceStates]:
@@ -37,7 +37,7 @@ class InvoiceService:
 
         return InvoiceSerializer(invoice).data
 
-    def delete(self, invoice_id: int):
+    def delete_invoice(self, invoice_id: int):
         invoice = self._get_or_fail(Invoice, invoice_id)
         invoice.delete()
         return {"message": f"Invoice {invoice_id} deleted successfully"}
@@ -58,7 +58,7 @@ class InvoiceService:
             ],
         }
 
-    def find_all(self, state: str = None, start_date: date = None, end_date: date = None):
+    def get_all_invoices(self, state: str = None, start_date: date = None, end_date: date = None):
         queryset = Invoice.objects.all()
 
         if state:

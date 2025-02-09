@@ -1,6 +1,6 @@
-from enum import Enum
+from django.db import models
 
-class AccountingCodes(Enum):
-    PURCHASES = "6000"  # DEBE Compras
-    VAT_SUPPORTED = "4720"  # DEBE IVA Soportado
-    SUPPLIERS = "4000"  # HABER Proveedores
+class AccountingCodes(models.TextChoices):
+    PURCHASES = "6000", "Purchases (DEBE Compras)"
+    VAT_SUPPORTED = "4720", "VAT Supported (DEBE IVA Soportado)"
+    SUPPLIERS = "4000", "Suppliers (HABER Proveedores)"

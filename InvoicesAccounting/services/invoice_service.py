@@ -1,76 +1,111 @@
-from datetime import date
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from InvoicesAccounting.enum.accounting_codes import AccountingCodes
+from typing import List, Dict
+from django.forms import model_to_dict
+import httpx
+from Inmatic import settings
 from InvoicesAccounting.models import Invoice
-from InvoicesAccounting.enum.invoice_states import InvoiceStates
-from InvoicesAccounting.serializers import InvoiceSerializer
 
 class InvoiceService:
-    def create_invoice(self, data: dict):
-        if "state" in data and data["state"] not in [state.value for state in InvoiceStates]:
-            raise ValidationError("Invalid invoice state")
+    BASE_URL = settings.PAYMENT_API_BASE_URL
 
-        invoice = Invoice.objects.create(
-            provider=data["provider"],
-            concept=data["concept"],
-            base_value=data["base_value"],
-            vat=data["vat"],
-            total_value=data["total_value"],
-            date=data["date"],
-            state=data["state"],
-        )
-        return InvoiceSerializer(invoice).data
+    def __init__(self, base_url=None):
+        self.base_url = base_url or self.BASE_URL
+        if not self.base_url:
+            raise ValueError("BASE_URL is not configured. Please check your settings.")
+        self.client = httpx.Client(base_url=self.base_url, timeout=30)
 
-    def get_invoice(self, invoice_id: int):
-        invoice = self._get_or_fail(Invoice, invoice_id)
-        return InvoiceSerializer(invoice).data
+    def list_invoices(self) -> List[Dict]:
+        """
+        Fetch all invoices from the system.
 
-    def update_invoice(self, invoice_id: int, data: dict):
-        invoice = self._get_or_fail(Invoice, invoice_id)
+        Returns:
+            list[dict]: A list of invoices.
+        """
+        response = self.client.get("/invoices")
+        response.raise_for_status()
+        return response.json()
 
-        if "state" in data and data["state"] not in [state.value for state in InvoiceStates]:
-            raise ValidationError("Invalid invoice state")
+    def create_invoice(self, data: Invoice) -> Dict:
+        """
+        Create a new invoice.
 
-        for field, value in data.items():
-            setattr(invoice, field, value)
-        invoice.save()
+        Args:
+            data (dict): The data to create a new invoice.
 
-        return InvoiceSerializer(invoice).data
+        Returns:
+            dict: The newly created invoice.
+        """
+        response = self.client.post("/invoices", json=model_to_dict(data))
+        response.raise_for_status()
+        return response.json()
 
-    def delete_invoice(self, invoice_id: int):
-        invoice = self._get_or_fail(Invoice, invoice_id)
-        invoice.delete()
+    def get_invoice(self, invoice_id: int) -> Dict:
+        """
+        Fetch an invoice by its ID.
+
+        Args:
+            invoice_id (int): The ID of the invoice.
+
+        Returns:
+            dict: The invoice details.
+        """
+        response = self.client.get(f"/invoice/{invoice_id}/")  
+        response.raise_for_status()
+        return response.json()
+
+
+    def update_invoice(self, invoice_id: int, data: Dict) -> Dict:
+        """
+        Update an existing invoice.
+
+        Args:
+            invoice_id (int): The ID of the invoice.
+            data (dict): The data to update the invoice.
+
+        Returns:
+            dict: The updated invoice.
+        """
+        response = self.client.put(f"/invoices/{invoice_id}", json=data)
+        response.raise_for_status()
+        return response.json()
+
+    def delete_invoice(self, invoice_id: int) -> Dict:
+        """
+        Delete an invoice by its ID.
+
+        Args:
+            invoice_id (int): The ID of the invoice.
+
+        Returns:
+            dict: A message indicating successful deletion.
+        """
+        response = self.client.delete(f"/invoices/{invoice_id}")
+        response.raise_for_status()
         return {"message": f"Invoice {invoice_id} deleted successfully"}
 
-    def generate_accounting_entries(self, invoice_id: int):
-        invoice = self._get_or_fail(Invoice, invoice_id)
+    def filter_invoices(self, **params) -> List[Dict]:
+        """
+        Filter invoices based on query parameters.
 
-        if invoice.state != InvoiceStates.PAID.value:
-            raise ValidationError("Accounting entries can only be generated for invoices in the PAID state.")
+        Args:
+            **params: Filter parameters.
 
-        return {
-            "DEBE": [
-                {"account": AccountingCodes.PURCHASES.value, "amount": float(invoice.base_value)},
-                {"account": AccountingCodes.VAT_SUPPORTED.value, "amount": float(invoice.vat)},
-            ],
-            "HABER": [
-                {"account": AccountingCodes.SUPPLIERS.value, "amount": float(invoice.total_value)},
-            ],
-        }
+        Returns:
+            list[dict]: The filtered list of invoices.
+        """
+        response = self.client.get("/invoices", params=params)
+        response.raise_for_status()
+        return response.json()
 
-    def get_all_invoices(self, state: str = None, start_date: date = None, end_date: date = None):
-        queryset = Invoice.objects.all()
+    def generate_accounting_entries(self, invoice_id: int) -> Dict:
+        """
+        Generate accounting entries for a given invoice.
 
-        if state:
-            queryset = queryset.filter(state=state)
+        Args:
+            invoice_id (int): The ID of the invoice.
 
-        if start_date and end_date:
-            queryset = queryset.filter(date__range=[start_date, end_date])
-
-        return InvoiceSerializer(queryset, many=True).data
-
-    def _get_or_fail(self, model, id: int):
-        try:
-            return model.objects.get(id=id)
-        except ObjectDoesNotExist:
-            raise ValidationError(f"{model.__name__} with id {id} does not exist")
+        Returns:
+            dict: The generated accounting entries.
+        """
+        response = self.client.get(f"/invoices/{invoice_id}/accounting-entries")
+        response.raise_for_status()        
+        return response.json()

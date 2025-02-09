@@ -1,8 +1,8 @@
-from enum import Enum
+from django.db import models
 
-class InvoiceStates(Enum):
-    DRAFT = "draft"
-    ACCOUNTED = "accounted"
-    PAID = "paid"
-    CANCELED = "canceled"
-    PENDING = "pending" 
+class InvoiceStates(models.TextChoices):
+    DRAFT = "draft", "Draft"
+    ACCOUNTED = "accounted", "Accounted"
+    PAID = "paid", "Paid"
+    CANCELED = "canceled", "Canceled"
+    PENDING = "pending", "Pending"

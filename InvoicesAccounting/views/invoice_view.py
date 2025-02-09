@@ -1,15 +1,24 @@
 from rest_framework.views import APIView
+from rest_framework.response import Response
 from InvoicesAccounting.services.invoice_service import InvoiceService
 
 class InvoiceView(APIView):
+    # Get all invoices or a specific one by ID
     def get(self, request, invoice_id=None):
-        return InvoiceService().get_invoice_by_id(invoice_id) if invoice_id else InvoiceService().filter_invoices()
+        if invoice_id:
+            data = InvoiceService().find_by_id(invoice_id)
+        else:
+            data = InvoiceService().find_all()
+        return Response(data)
 
+    # Create a new invoice
     def post(self, request):
-        return InvoiceService().create_invoice(request.data)
+        return Response(InvoiceService().create(request.data), status=201)
 
+    # Update an existing invoice
     def put(self, request, invoice_id):
-        return InvoiceService().update_invoice(invoice_id, request.data)
+        return Response(InvoiceService().update(invoice_id, request.data))
 
+    # Delete an invoice
     def delete(self, request, invoice_id):
-        return InvoiceService().delete_invoice(invoice_id)
+        return Response(InvoiceService().delete(invoice_id))

@@ -12,6 +12,15 @@ class InvoiceServiceTest(TestCase):
         self.service = InvoiceService(base_url=settings.PAYMENT_API_BASE_URL)
 
     @patch("httpx.Client.get")
+    def test_init_with_custom_base_url(self, mock_get):
+       
+        custom_url = "http://custom-api-url.com"
+
+        custom_service = InvoiceService(base_url=custom_url)
+
+        self.assertEqual(custom_service.base_url, custom_url)
+
+    @patch("httpx.Client.get")
     def test_lists_all_invoices(self, mock_get):
         invoices_data = [
             {"id": 1, "provider": "Provider A", "total_value": 100.0},

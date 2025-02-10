@@ -196,8 +196,15 @@ class InvoiceViewTest(TestCase):
         )
 
         # Assert
+        response_data = response.json()
         self.assertEqual(response.status_code, 400)
-        self.assertIn("error", response.json())
+        
+        # Asegurar que los errores de validación de campos obligatorios estén presentes
+        self.assertIn("concept", response_data)
+        self.assertIn("base_value", response_data)
+        self.assertIn("vat", response_data)
+        self.assertIn("total_value", response_data)
+        self.assertIn("date", response_data)
 
     @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.update_invoice")
     def test_update_invoice_not_found_needs_authentication(self, mock_update_invoice):

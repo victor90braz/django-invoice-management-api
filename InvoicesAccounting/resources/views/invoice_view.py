@@ -2,8 +2,9 @@ import json
 import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from Inmatic import settings
 from InvoicesAccounting.app.services.invoice_service import InvoiceService
+from InvoicesAccounting.serializers import InvoiceSerializer
+
 logger = logging.getLogger(__name__)
 
 @csrf_exempt
@@ -16,7 +17,7 @@ def list_invoices(request):
         return JsonResponse(data, safe=False)
     except Exception as e:
         logger.error(f"Error listing invoices: {str(e)}")
-        return JsonResponse({"error": f"An error occurred while listing invoices: {str(e)}"}, status=500)
+        return JsonResponse({"error": "An error occurred while listing invoices."}, status=500)
 
 @csrf_exempt
 def retrieve_invoice(request, invoice_id):
@@ -25,11 +26,10 @@ def retrieve_invoice(request, invoice_id):
     """
     try:
         data = InvoiceService().get_invoice(invoice_id)
-        if not data:
-            return JsonResponse({"error": "Invoice not found"}, status=404)
-        return JsonResponse(data)
+        return JsonResponse(data) if data else JsonResponse({"error": "Invoice not found"}, status=404)
     except Exception as e:
-        return JsonResponse({"error": f"An error occurred while retrieving the invoice: {str(e)}"}, status=500)
+        logger.error(f"Error retrieving invoice: {str(e)}")
+        return JsonResponse({"error": "An error occurred while retrieving the invoice."}, status=500)
 
 @csrf_exempt
 def create_invoice(request):
@@ -40,18 +40,18 @@ def create_invoice(request):
         return JsonResponse({"error": "Authentication required"}, status=401)
 
     try:
-        body = json.loads(request.body)
-        
-        required_fields = ["provider", "concept", "base_value", "vat", "total_value", "date", "state"]
-        if not all(field in body for field in required_fields):
-            return JsonResponse({"error": "Missing required fields"}, status=400)
+        data = json.loads(request.body)
+        serializer = InvoiceSerializer(data=data)
+        if not serializer.is_valid():
+            return JsonResponse(serializer.errors, status=400)
 
-        created_invoice = InvoiceService().create_invoice(body)
+        created_invoice = InvoiceService().create_invoice(serializer.validated_data)
         return JsonResponse(created_invoice, status=201)
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON"}, status=400)
     except Exception as e:
-        return JsonResponse({"error": f"An error occurred while creating the invoice: {str(e)}"}, status=500)
+        logger.error(f"Error creating invoice: {str(e)}")
+        return JsonResponse({"error": "An error occurred while creating the invoice."}, status=500)
 
 @csrf_exempt
 def update_invoice(request, invoice_id):
@@ -62,20 +62,18 @@ def update_invoice(request, invoice_id):
         return JsonResponse({"error": "Authentication required"}, status=401)
 
     try:
-        body = json.loads(request.body)
-        
-        required_fields = ["provider", "concept", "base_value", "vat", "total_value", "date", "state"]
-        if not all(field in body for field in required_fields):
-            return JsonResponse({"error": "Missing required fields"}, status=400)
+        data = json.loads(request.body)
+        serializer = InvoiceSerializer(data=data, partial=True)  # `partial=True` permite actualizaciones parciales
+        if not serializer.is_valid():
+            return JsonResponse(serializer.errors, status=400)
 
-        updated_invoice = InvoiceService().update_invoice(invoice_id, body)
-        if not updated_invoice:
-            return JsonResponse({"error": "Invoice not found"}, status=404)
-        return JsonResponse(updated_invoice)
+        updated_invoice = InvoiceService().update_invoice(invoice_id, serializer.validated_data)
+        return JsonResponse(updated_invoice) if updated_invoice else JsonResponse({"error": "Invoice not found"}, status=404)
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON"}, status=400)
     except Exception as e:
-        return JsonResponse({"error": f"An error occurred while updating the invoice: {str(e)}"}, status=500)
+        logger.error(f"Error updating invoice: {str(e)}")
+        return JsonResponse({"error": "An error occurred while updating the invoice."}, status=500)
 
 @csrf_exempt
 def delete_invoice(request, invoice_id):
@@ -87,11 +85,10 @@ def delete_invoice(request, invoice_id):
 
     try:
         result = InvoiceService().delete_invoice(invoice_id)
-        if not result:
-            return JsonResponse({"error": "Invoice not found"}, status=404)
-        return JsonResponse({"message": "Invoice deleted successfully"})
+        return JsonResponse({"message": "Invoice deleted successfully"}) if result else JsonResponse({"error": "Invoice not found"}, status=404)
     except Exception as e:
-        return JsonResponse({"error": f"An error occurred while deleting the invoice: {str(e)}"}, status=500)
+        logger.error(f"Error deleting invoice: {str(e)}")
+        return JsonResponse({"error": "An error occurred while deleting the invoice."}, status=500)
 
 @csrf_exempt
 def filter_invoices(request):
@@ -103,7 +100,8 @@ def filter_invoices(request):
         filtered_data = InvoiceService().filter_invoices(**filters)
         return JsonResponse(filtered_data, safe=False)
     except Exception as e:
-        return JsonResponse({"error": f"An error occurred while filtering invoices: {str(e)}"}, status=500)
+        logger.error(f"Error filtering invoices: {str(e)}")
+        return JsonResponse({"error": "An error occurred while filtering invoices."}, status=500)
 
 @csrf_exempt
 def generate_accounting_entries(request, invoice_id):
@@ -112,8 +110,7 @@ def generate_accounting_entries(request, invoice_id):
     """
     try:
         accounting_data = InvoiceService().generate_accounting_entries(invoice_id)
-        if not accounting_data:
-            return JsonResponse({"error": "Invoice not found"}, status=404)
-        return JsonResponse(accounting_data)
+        return JsonResponse(accounting_data) if accounting_data else JsonResponse({"error": "Invoice not found"}, status=404)
     except Exception as e:
-        return JsonResponse({"error": f"An error occurred while generating accounting entries: {str(e)}"}, status=500)
+        logger.error(f"Error generating accounting entries: {str(e)}")
+        return JsonResponse({"error": "An error occurred while generating accounting entries."}, status=500)

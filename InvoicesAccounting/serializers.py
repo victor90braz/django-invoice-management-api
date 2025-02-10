@@ -1,6 +1,6 @@
 from rest_framework import serializers
+from InvoicesAccounting.app.enum.invoice_states import InvoiceStates
 from InvoicesAccounting.models import Invoice
-from InvoicesAccounting.enum.invoice_states import InvoiceStates
 
 class InvoiceSerializer(serializers.ModelSerializer):
     class Meta:

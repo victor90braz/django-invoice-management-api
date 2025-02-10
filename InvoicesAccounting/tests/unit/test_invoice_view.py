@@ -1,8 +1,8 @@
 from unittest.mock import patch
 from django.test import TestCase, Client
 from django.urls import reverse
+from InvoicesAccounting.app.enum.invoice_states import InvoiceStates
 from InvoicesAccounting.models import Invoice
-from InvoicesAccounting.enum.invoice_states import InvoiceStates
 import json
 
 class InvoiceViewTest(TestCase):
@@ -29,16 +29,16 @@ class InvoiceViewTest(TestCase):
         }
 
     # Happy Path Tests
-    @patch("InvoicesAccounting.services.invoice_service.InvoiceService.list_invoices")
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.list_invoices")
     def test_list_invoices(self, mock_list_invoices):
         mock_list_invoices.return_value = [
             {"id": self.invoice.id, "provider": self.invoice.provider, "total_value": self.invoice.total_value}
         ]
-        response = self.client.get(reverse('invoice-list'))
+        response = self.client.get(reverse('invoices-list'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.invoice.provider)
 
-    @patch("InvoicesAccounting.services.invoice_service.InvoiceService.get_invoice")
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.get_invoice")
     def test_get_invoice_by_id(self, mock_get_invoice):
         mock_get_invoice.return_value = {
             "id": self.invoice.id,
@@ -52,14 +52,14 @@ class InvoiceViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.invoice.provider)
 
-    @patch("InvoicesAccounting.services.invoice_service.InvoiceService.create_invoice")
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.create_invoice")
     def test_create_invoice(self, mock_create_invoice):
         mock_create_invoice.return_value = {**self.valid_payload, "id": 2}
         response = self.client.post(reverse('invoice-create'), data=json.dumps(self.valid_payload), content_type="application/json")
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json()["provider"], self.valid_payload["provider"])
 
-    @patch("InvoicesAccounting.services.invoice_service.InvoiceService.update_invoice")
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.update_invoice")
     def test_update_invoice(self, mock_update_invoice):
         updated_data = {**self.valid_payload, "concept": "Updated Concept"}
         mock_update_invoice.return_value = updated_data
@@ -71,14 +71,14 @@ class InvoiceViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["concept"], "Updated Concept")
 
-    @patch("InvoicesAccounting.services.invoice_service.InvoiceService.delete_invoice")
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.delete_invoice")
     def test_delete_invoice_by_id(self, mock_delete_invoice):
         mock_delete_invoice.return_value = {"message": "Invoice deleted successfully"}
         response = self.client.delete(reverse('invoice-delete', args=[self.invoice.id]))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["message"], "Invoice deleted successfully")
 
-    @patch("InvoicesAccounting.services.invoice_service.InvoiceService.get_invoice")
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.get_invoice")
     def test_it_status_ok(self, mock_get_invoice):
         mock_get_invoice.return_value = {
             "id": self.invoice.id,
@@ -96,7 +96,7 @@ class InvoiceViewTest(TestCase):
         self.assertEqual(response.json()["provider"], self.invoice.provider)
 
     # Error and Edge Case Tests
-    @patch("InvoicesAccounting.services.invoice_service.InvoiceService.get_invoice")
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.get_invoice")
     def test_get_invoice_by_id_not_found(self, mock_get_invoice):
         mock_get_invoice.return_value = None  # Simulate invoice not found
         response = self.client.get(reverse('invoice-get-id', args=[999]))  # Non-existent ID
@@ -114,7 +114,7 @@ class InvoiceViewTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("error", response.json())
 
-    @patch("InvoicesAccounting.services.invoice_service.InvoiceService.update_invoice")
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.update_invoice")
     def test_update_invoice_not_found(self, mock_update_invoice):
         mock_update_invoice.return_value = None  # Simulate invoice not found
         updated_data = {**self.valid_payload, "concept": "Updated Concept"}
@@ -126,21 +126,21 @@ class InvoiceViewTest(TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["error"], "Invoice not found")
 
-    @patch("InvoicesAccounting.services.invoice_service.InvoiceService.delete_invoice")
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.delete_invoice")
     def test_delete_invoice_not_found(self, mock_delete_invoice):
         mock_delete_invoice.return_value = False  # Simulate invoice not found
         response = self.client.delete(reverse('invoice-delete', args=[999]))  # Non-existent ID
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["error"], "Invoice not found")
 
-    @patch("InvoicesAccounting.services.invoice_service.InvoiceService.filter_invoices")
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.filter_invoices")
     def test_filter_invoices_invalid_filters(self, mock_filter_invoices):
         mock_filter_invoices.side_effect = Exception("Invalid filters")
         response = self.client.get(reverse('invoice-filter'), data={"invalid_filter": "value"})
         self.assertEqual(response.status_code, 500)
         self.assertIn("error", response.json())
 
-    @patch("InvoicesAccounting.services.invoice_service.InvoiceService.generate_accounting_entries")
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.generate_accounting_entries")
     def test_generate_accounting_entries_not_found(self, mock_generate_accounting_entries):
         mock_generate_accounting_entries.return_value = None  # Simulate invoice not found
         response = self.client.get(reverse('invoice-generate-accounting-entries', args=[999]))  # Non-existent ID

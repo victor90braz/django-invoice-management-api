@@ -1,5 +1,5 @@
 from django.urls import path
-from InvoicesAccounting.views.invoice_view import (
+from InvoicesAccounting.resources.views.invoice_view import (
     list_invoices,
     retrieve_invoice,
     create_invoice,
@@ -10,7 +10,7 @@ from InvoicesAccounting.views.invoice_view import (
 )
 
 urlpatterns = [
-    path("invoices/list/", list_invoices, name="invoice-list"),
+    path("invoices/list/", list_invoices, name="invoices-list"),  
     path("invoice/<int:invoice_id>/", retrieve_invoice, name="invoice-get-id"),
     path("invoices/create/", create_invoice, name="invoice-create"),
     path("invoices/update/<int:invoice_id>/", update_invoice, name="invoice-update"),

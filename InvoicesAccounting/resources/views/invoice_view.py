@@ -1,8 +1,10 @@
 import json
+import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from Inmatic import settings
-from InvoicesAccounting.services.invoice_service import InvoiceService
+from InvoicesAccounting.app.services.invoice_service import InvoiceService
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def list_invoices(request):
@@ -13,6 +15,7 @@ def list_invoices(request):
         data = InvoiceService().list_invoices()
         return JsonResponse(data, safe=False)
     except Exception as e:
+        logger.error(f"Error listing invoices: {str(e)}")
         return JsonResponse({"error": f"An error occurred while listing invoices: {str(e)}"}, status=500)
 
 @csrf_exempt

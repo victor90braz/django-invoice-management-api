@@ -1,10 +1,10 @@
 from unittest.mock import patch
 from django.test import TestCase
 from Inmatic import settings
-from InvoicesAccounting.enum.accounting_codes import AccountingCodes
-from InvoicesAccounting.enum.invoice_states import InvoiceStates
+from InvoicesAccounting.app.enum.accounting_codes import AccountingCodes
+from InvoicesAccounting.app.enum.invoice_states import InvoiceStates
+from InvoicesAccounting.app.services.invoice_service import InvoiceService
 from InvoicesAccounting.models import Invoice
-from InvoicesAccounting.services.invoice_service import InvoiceService
 
 class InvoiceServiceTest(TestCase):
 

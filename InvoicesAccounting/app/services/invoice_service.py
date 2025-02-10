@@ -11,7 +11,7 @@ class InvoiceService:
         self.base_url = base_url or self.BASE_URL
         if not self.base_url:
             raise ValueError("BASE_URL is not configured. Please check your settings.")
-        self.client = httpx.Client(base_url=self.base_url, timeout=30)
+        self.client = httpx.Client(base_url=self.base_url, timeout=60)
 
     def list_invoices(self) -> List[Dict]:
         """
@@ -20,7 +20,7 @@ class InvoiceService:
         Returns:
             list[dict]: A list of invoices.
         """
-        response = self.client.get("/invoices")
+        response = self.client.get("invoices/list/")
         response.raise_for_status()
         return response.json()
 

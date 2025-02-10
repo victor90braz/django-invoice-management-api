@@ -1,5 +1,6 @@
 from django.db import models
-from InvoicesAccounting.enum.invoice_states import InvoiceStates  
+
+from InvoicesAccounting.app.enum.invoice_states import InvoiceStates
 
 class Invoice(models.Model):
     provider = models.CharField(max_length=255)

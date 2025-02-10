@@ -11,14 +11,14 @@ class InvoiceViewTest(TestCase):
     def setUp(self):
         self.client = Client()
 
-        # Arrange: Set up test user and log in
+        # Arrange
         self.user = User.objects.create_user(
             username="testuser",
             password="testpassword"
         )
         self.client.login(username="testuser", password="testpassword")
 
-        # Arrange: Set up initial data
+        # Arrange
         self.invoice = InvoiceModel.objects.create(
             provider="Provider A",
             concept="Test Concept",
@@ -29,7 +29,7 @@ class InvoiceViewTest(TestCase):
             state=InvoiceStates.PENDING.value,
         )
 
-        # Arrange: Prepare a valid payload
+        # Arrange
         self.valid_payload = {
             "provider": "Provider B",
             "concept": "New Invoice",
@@ -48,7 +48,7 @@ class InvoiceViewTest(TestCase):
         ]
 
         # Act
-        response = self.client.get(reverse('invoices-list'))
+        response = self.client.get(reverse('invoice-list')) 
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -67,7 +67,7 @@ class InvoiceViewTest(TestCase):
         }
 
         # Act
-        response = self.client.get(reverse('invoice-get-id', args=[self.invoice.id]))
+        response = self.client.get(reverse('invoice-detail', args=[self.invoice.id]))  
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -150,7 +150,7 @@ class InvoiceViewTest(TestCase):
         }
 
         # Act
-        response = self.client.get(f"/invoice/{self.invoice.id}/")
+        response = self.client.get(reverse('invoice-detail', args=[self.invoice.id]))  
 
         # Assert
         self.assertEqual(response.status_code, 200)
@@ -163,7 +163,7 @@ class InvoiceViewTest(TestCase):
         mock_get_invoice.return_value = None
 
         # Act
-        response = self.client.get(reverse('invoice-get-id', args=[999]))
+        response = self.client.get(reverse('invoice-detail', args=[999])) 
 
         # Assert
         self.assertEqual(response.status_code, 404)
@@ -198,8 +198,6 @@ class InvoiceViewTest(TestCase):
         # Assert
         response_data = response.json()
         self.assertEqual(response.status_code, 400)
-        
-        # Asegurar que los errores de validación de campos obligatorios estén presentes
         self.assertIn("concept", response_data)
         self.assertIn("base_value", response_data)
         self.assertIn("vat", response_data)
@@ -253,7 +251,7 @@ class InvoiceViewTest(TestCase):
         mock_generate_accounting_entries.return_value = None
 
         # Act
-        response = self.client.get(reverse('invoice-generate-accounting-entries', args=[999]))
+        response = self.client.get(reverse('invoice-accounting-entries', args=[999])) 
 
         # Assert
         self.assertEqual(response.status_code, 404)
@@ -261,27 +259,25 @@ class InvoiceViewTest(TestCase):
 
     @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.list_invoices")
     def test_simulate_an_exception_500_in_list_invoices(self, mock_list_invoices):
-        # Arrange: Make sure no invoices exist in the database
+        # Arrange
         InvoiceModel.objects.all().delete()  
         
-        # Simulate an exception in InvoiceService.list_invoices
         mock_list_invoices.side_effect = Exception("Test exception")
 
         # Act
-        response = self.client.get(reverse("invoices-list"))
+        response = self.client.get(reverse("invoice-list"))  # Updated URL name
 
         # Assert
         self.assertEqual(response.status_code, 500)  
         self.assertIn("An error occurred while listing invoices", response.json().get("error", ""))
 
     @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.get_invoice")
-    def test_simulate_an_exception_500_in_retrieve_invoice(self, mock_list_invoices):
-        # Arrange: Simulate an exception in InvoiceService.retrieve_invoice
-        mock_list_invoices.side_effect = Exception("Test exception")
+    def test_simulate_an_exception_500_in_retrieve_invoice(self, mock_get_invoice):
+        # Arrange
+        mock_get_invoice.side_effect = Exception("Test exception")
         
-        # Pass a valid invoice_id to the URL reverse lookup
-        invoice_id = 1  # Or any valid invoice ID you want to test
-        url = reverse('invoice-get-id', args=[invoice_id])
+        invoice_id = 1 
+        url = reverse('invoice-detail', args=[invoice_id]) 
 
         # Act
         response = self.client.get(url)

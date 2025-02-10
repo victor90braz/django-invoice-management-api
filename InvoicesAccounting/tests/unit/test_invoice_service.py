@@ -5,8 +5,6 @@ from Inmatic import settings
 from InvoicesAccounting.app.enums.accounting_codes import AccountingCodes
 from InvoicesAccounting.app.enums.invoice_states import InvoiceStates
 from InvoicesAccounting.app.services.invoice_service import InvoiceService
-from InvoicesAccounting.app.models.invoice_model import InvoiceModel
-
 
 class InvoiceServiceTest(TestCase):
 
@@ -26,7 +24,7 @@ class InvoiceServiceTest(TestCase):
 
     @patch("httpx.Client.get")
     def test_invoice_service_lists_all_invoices(self, mock_get):
-        # Arrange: Mock API response with valid states and Decimal values for numeric fields
+        # Arrange
         invoices_data = [
             {
                 "provider": "Provider A",
@@ -35,7 +33,7 @@ class InvoiceServiceTest(TestCase):
                 "vat": Decimal("21.00"),
                 "total_value": Decimal("121.00"),
                 "date": "2025-02-08",
-                "state": InvoiceStates.PENDING.value  # Use enum value
+                "state": InvoiceStates.PENDING.value  
             },
             {
                 "provider": "Provider B",
@@ -44,40 +42,40 @@ class InvoiceServiceTest(TestCase):
                 "vat": Decimal("42.00"),
                 "total_value": Decimal("242.00"),
                 "date": "2025-02-11",
-                "state": InvoiceStates.ACCOUNTED.value  # Use enum value
+                "state": InvoiceStates.ACCOUNTED.value  
             },
         ]
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = invoices_data
 
-        # Act: Call the API
+        # Act
         invoices = self.service.list_invoices()
 
-        # Assert: Ensure the mock data and actual return data match
+        # Assert
         self.assertEqual(invoices, invoices_data)
 
     @patch("httpx.Client.post")
     def test_invoice_service_creates_invoice(self, mock_post):
         # Arrange
-        invoice = InvoiceModel.objects.create(
-            provider="Provider A",
-            concept="Product Purchase",
-            base_value=100.0,
-            vat=21.0,
-            total_value=121.0,
-            date="2025-02-08",
-            state=InvoiceStates.PENDING.value,
-        )
+        invoice_data = {
+            "provider": "Provider A",
+            "concept": "Product Purchase",
+            "base_value": Decimal("100.00"),
+            "vat": Decimal("21.00"),
+            "total_value": Decimal("121.00"),
+            "date": "2025-02-08",
+            "state": InvoiceStates.PENDING.value,
+        }
         mock_post.return_value.status_code = 201
-        mock_post.return_value.json.return_value = {**invoice.__dict__, "id": 1}
+        mock_post.return_value.json.return_value = {**invoice_data, "id": 1}
 
         # Act
-        created_invoice = self.service.create_invoice(invoice)
+        created_invoice = self.service.create_invoice(invoice_data)
 
         # Assert
         self.assertEqual(created_invoice["provider"], "Provider A")
         self.assertEqual(created_invoice["concept"], "Product Purchase")
-        self.assertEqual(created_invoice["total_value"], 121.0)
+        self.assertEqual(created_invoice["total_value"], Decimal("121.00"))
         self.assertEqual(created_invoice["date"], "2025-02-08")
         self.assertEqual(created_invoice["state"], InvoiceStates.PENDING.value)
 
@@ -89,9 +87,9 @@ class InvoiceServiceTest(TestCase):
             "id": invoice_id,
             "provider": "Provider A",
             "concept": "Product Purchase",
-            "base_value": 100.0,
-            "vat": 21.0,
-            "total_value": 121.0,
+            "base_value": Decimal("100.00"),
+            "vat": Decimal("21.00"),
+            "total_value": Decimal("121.00"),
             "date": "2025-02-08",
             "state": InvoiceStates.PENDING.value,
         }
@@ -110,15 +108,15 @@ class InvoiceServiceTest(TestCase):
         invoice_id = 1
         update_data = {
             "concept": "Updated Concept",
-            "total_value": 150.0,
+            "total_value": Decimal("150.00"),
         }
         updated_invoice_data = {
             "id": invoice_id,
             "provider": "Provider A",
             "concept": "Updated Concept",
-            "base_value": 100.0,
-            "vat": 21.0,
-            "total_value": 150.0,
+            "base_value": Decimal("100.00"),
+            "vat": Decimal("21.00"),
+            "total_value": Decimal("150.00"),
             "date": "2025-02-08",
             "state": InvoiceStates.PENDING.value,
         }
@@ -148,7 +146,7 @@ class InvoiceServiceTest(TestCase):
         # Arrange
         filter_params = {"provider": "Provider A"}
         filtered_invoices_data = [
-            {"id": 1, "provider": "Provider A", "total_value": 100.0},
+            {"id": 1, "provider": "Provider A", "total_value": Decimal("100.00")},
         ]
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = filtered_invoices_data
@@ -164,9 +162,9 @@ class InvoiceServiceTest(TestCase):
         # Arrange
         invoice_id = 1
         accounting_entries_data = [
-            {"code": AccountingCodes.PURCHASES, "description": "DEBE Compras", "amount": 100.0},
-            {"code": AccountingCodes.VAT_SUPPORTED, "description": "DEBE IVA Soportado", "amount": 21.0},
-            {"code": AccountingCodes.SUPPLIERS, "description": "HABER Proveedores", "amount": 121.0},
+            {"code": AccountingCodes.PURCHASES, "description": "DEBE Compras", "amount": Decimal("100.00")},
+            {"code": AccountingCodes.VAT_SUPPORTED, "description": "DEBE IVA Soportado", "amount": Decimal("21.00")},
+            {"code": AccountingCodes.SUPPLIERS, "description": "HABER Proveedores", "amount": Decimal("121.00")},
         ]
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = accounting_entries_data
@@ -179,10 +177,10 @@ class InvoiceServiceTest(TestCase):
         self.assertEqual(len(entries), 3)
         self.assertEqual(entries[0]["code"], AccountingCodes.PURCHASES)
         self.assertEqual(entries[0]["description"], "DEBE Compras")
-        self.assertEqual(entries[0]["amount"], 100.0)
+        self.assertEqual(entries[0]["amount"], Decimal("100.00"))
         self.assertEqual(entries[1]["code"], AccountingCodes.VAT_SUPPORTED)
         self.assertEqual(entries[1]["description"], "DEBE IVA Soportado")
-        self.assertEqual(entries[1]["amount"], 21.0)
+        self.assertEqual(entries[1]["amount"], Decimal("21.00"))
         self.assertEqual(entries[2]["code"], AccountingCodes.SUPPLIERS)
         self.assertEqual(entries[2]["description"], "HABER Proveedores")
-        self.assertEqual(entries[2]["amount"], 121.0)
+        self.assertEqual(entries[2]["amount"], Decimal("121.00"))

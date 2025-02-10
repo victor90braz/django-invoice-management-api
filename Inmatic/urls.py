@@ -10,12 +10,24 @@ from InvoicesAccounting.resources.views.invoice_view import (
 )
 
 urlpatterns = [
-    path("invoices/list/", list_invoices, name="invoices-list"),  
-    path("invoice/<int:invoice_id>/", retrieve_invoice, name="invoice-get-id"),
+    # Get all invoices
+    path("invoices/", list_invoices, name="invoice-list"),
+    
+    # Get an invoice by ID
+    path("invoices/<int:invoice_id>/", retrieve_invoice, name="invoice-detail"),
+    
+    # Create a new invoice
     path("invoices/create/", create_invoice, name="invoice-create"),
-    path("invoices/update/<int:invoice_id>/", update_invoice, name="invoice-update"),
-    path("invoices/delete/<int:invoice_id>/", delete_invoice, name="invoice-delete"),
+    
+    # Update an existing invoice by ID
+    path("invoices/<int:invoice_id>/update/", update_invoice, name="invoice-update"),
+    
+    # Delete an existing invoice by ID
+    path("invoices/<int:invoice_id>/delete/", delete_invoice, name="invoice-delete"),
+    
+    # Filter invoices by state and date
     path("invoices/filter/", filter_invoices, name="invoice-filter"),
-    path("invoices/<int:invoice_id>/accounting-entries/", generate_accounting_entries, name="invoice-generate-accounting-entries"),
+    
+    # Generate accounting entries for a specific invoice
+    path("invoices/<int:invoice_id>/accounting-entries/", generate_accounting_entries, name="invoice-accounting-entries"),
 ]
-

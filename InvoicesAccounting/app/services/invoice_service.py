@@ -3,7 +3,7 @@ from django.forms import model_to_dict
 import httpx
 from Inmatic import settings
 from InvoicesAccounting.models import Invoice
-from InvoicesAccounting.serializers import InvoiceSerializer
+from InvoicesAccounting.app.http.requests.validate_invoice import ValidateInvoice
 
 class InvoiceService:
     BASE_URL = settings.PAYMENT_API_BASE_URL
@@ -35,7 +35,7 @@ class InvoiceService:
         Returns:
             dict: The newly created invoice data.
         """
-        serializer = InvoiceSerializer(instance=invoice)  
+        serializer = ValidateInvoice(instance=invoice)  
         response = self.client.post("/invoices/create/", json=serializer.data)  
         response.raise_for_status()
         return response.json()

@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from InvoicesAccounting.app.enum.invoice_states import InvoiceStates
+from InvoicesAccounting.app.enums.invoice_states import InvoiceStates
 from InvoicesAccounting.models import Invoice
 
-class InvoiceSerializer(serializers.ModelSerializer):
+class ValidateInvoice(serializers.ModelSerializer):
     class Meta:
         model = Invoice
         fields = ['id', 'provider', 'concept', 'base_value', 'vat', 'total_value', 'date', 'state']

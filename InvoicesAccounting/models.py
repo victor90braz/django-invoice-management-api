@@ -1,5 +1,5 @@
 from django.db import models
-from InvoicesAccounting.app.enum.invoice_states import InvoiceStates
+from InvoicesAccounting.app.enums.invoice_states import InvoiceStates
 from django.core.exceptions import ValidationError
 
 class Invoice(models.Model):

@@ -3,7 +3,7 @@ import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from InvoicesAccounting.app.services.invoice_service import InvoiceService
-from InvoicesAccounting.serializers import InvoiceSerializer
+from InvoicesAccounting.app.http.requests.validate_invoice import ValidateInvoice
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ def create_invoice(request):
 
     try:
         data = json.loads(request.body)
-        serializer = InvoiceSerializer(data=data)
+        serializer = ValidateInvoice(data=data)
         if not serializer.is_valid():
             return JsonResponse(serializer.errors, status=400)
 
@@ -63,7 +63,7 @@ def update_invoice(request, invoice_id):
 
     try:
         data = json.loads(request.body)
-        serializer = InvoiceSerializer(data=data, partial=True)  # `partial=True` permite actualizaciones parciales
+        serializer = ValidateInvoice(data=data, partial=True)  # `partial=True` permite actualizaciones parciales
         if not serializer.is_valid():
             return JsonResponse(serializer.errors, status=400)
 

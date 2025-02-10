@@ -3,7 +3,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth.models import User
 from InvoicesAccounting.app.enums.invoice_states import InvoiceStates
-from InvoicesAccounting.models import Invoice
+from InvoicesAccounting.app.models.invoice_model import InvoiceModel
 import json
 
 class InvoiceViewTest(TestCase):
@@ -19,7 +19,7 @@ class InvoiceViewTest(TestCase):
         self.client.login(username="testuser", password="testpassword")
 
         # Arrange: Set up initial data
-        self.invoice = Invoice.objects.create(
+        self.invoice = InvoiceModel.objects.create(
             provider="Provider A",
             concept="Test Concept",
             base_value=100.0,
@@ -261,14 +261,17 @@ class InvoiceViewTest(TestCase):
 
     @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.list_invoices")
     def test_simulate_an_exception_500_in_list_invoices(self, mock_list_invoices):
-        # Arrange: Simulate an exception in InvoiceService.list_invoices
+        # Arrange: Make sure no invoices exist in the database
+        InvoiceModel.objects.all().delete()  
+        
+        # Simulate an exception in InvoiceService.list_invoices
         mock_list_invoices.side_effect = Exception("Test exception")
 
         # Act
-        response = self.client.get(reverse('invoices-list'))
+        response = self.client.get(reverse("invoices-list"))
 
         # Assert
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 500)  
         self.assertIn("An error occurred while listing invoices", response.json().get("error", ""))
 
     @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.get_invoice")

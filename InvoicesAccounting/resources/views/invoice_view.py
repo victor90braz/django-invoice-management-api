@@ -2,6 +2,7 @@ import json
 import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from InvoicesAccounting.app.models.invoice_model import InvoiceModel
 from InvoicesAccounting.app.services.invoice_service import InvoiceService
 from InvoicesAccounting.app.http.requests.validate_invoice import ValidateInvoice
 
@@ -10,14 +11,21 @@ logger = logging.getLogger(__name__)
 @csrf_exempt
 def list_invoices(request):
     """
-    List all invoices.
+    List all invoices.  
+    - First, try fetching from the database.  
+    - If no invoices exist, call the external API and store them.  
     """
     try:
-        data = InvoiceService().list_invoices()
-        return JsonResponse(data, safe=False)
+        invoices = list(InvoiceModel.objects.all().values())
+
+        if not invoices:
+            invoices = InvoiceService().list_invoices() 
+        
+        return JsonResponse(invoices, safe=False)
+
     except Exception as e:
-        logger.error(f"Error listing invoices: {str(e)}")
-        return JsonResponse({"error": "An error occurred while listing invoices."}, status=500)
+        return JsonResponse({"error": "An error occurred while listing invoices."}, status=500)  
+
 
 @csrf_exempt
 def retrieve_invoice(request, invoice_id):

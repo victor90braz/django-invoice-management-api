@@ -1,10 +1,11 @@
+from decimal import Decimal
 from unittest.mock import patch
 from django.test import TestCase
 from Inmatic import settings
 from InvoicesAccounting.app.enums.accounting_codes import AccountingCodes
 from InvoicesAccounting.app.enums.invoice_states import InvoiceStates
 from InvoicesAccounting.app.services.invoice_service import InvoiceService
-from InvoicesAccounting.models import Invoice
+from InvoicesAccounting.app.models.invoice_model import InvoiceModel
 
 
 class InvoiceServiceTest(TestCase):
@@ -25,24 +26,40 @@ class InvoiceServiceTest(TestCase):
 
     @patch("httpx.Client.get")
     def test_invoice_service_lists_all_invoices(self, mock_get):
-        # Arrange
+        # Arrange: Mock API response with valid states and Decimal values for numeric fields
         invoices_data = [
-            {"id": 1, "provider": "Provider A", "total_value": 100.0},
-            {"id": 2, "provider": "Provider B", "total_value": 200.0},
+            {
+                "provider": "Provider A",
+                "concept": "Concept A",
+                "base_value": Decimal("100.00"),
+                "vat": Decimal("21.00"),
+                "total_value": Decimal("121.00"),
+                "date": "2025-02-08",
+                "state": InvoiceStates.PENDING.value  # Use enum value
+            },
+            {
+                "provider": "Provider B",
+                "concept": "Concept B",
+                "base_value": Decimal("200.00"),
+                "vat": Decimal("42.00"),
+                "total_value": Decimal("242.00"),
+                "date": "2025-02-11",
+                "state": InvoiceStates.ACCOUNTED.value  # Use enum value
+            },
         ]
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = invoices_data
 
-        # Act
+        # Act: Call the API
         invoices = self.service.list_invoices()
 
-        # Assert
+        # Assert: Ensure the mock data and actual return data match
         self.assertEqual(invoices, invoices_data)
 
     @patch("httpx.Client.post")
     def test_invoice_service_creates_invoice(self, mock_post):
         # Arrange
-        invoice = Invoice.objects.create(
+        invoice = InvoiceModel.objects.create(
             provider="Provider A",
             concept="Product Purchase",
             base_value=100.0,

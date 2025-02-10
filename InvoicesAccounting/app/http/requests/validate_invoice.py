@@ -1,11 +1,17 @@
 from rest_framework import serializers
+from decimal import Decimal
+
 from InvoicesAccounting.app.enums.invoice_states import InvoiceStates
-from InvoicesAccounting.models import Invoice
+from InvoicesAccounting.app.models.invoice_model import InvoiceModel
 
 class ValidateInvoice(serializers.ModelSerializer):
+    base_value = serializers.DecimalField(max_digits=10, decimal_places=2, coerce_to_string=False)
+    vat = serializers.DecimalField(max_digits=10, decimal_places=2, coerce_to_string=False)
+    total_value = serializers.DecimalField(max_digits=10, decimal_places=2, coerce_to_string=False)
+
     class Meta:
-        model = Invoice
-        fields = ['id', 'provider', 'concept', 'base_value', 'vat', 'total_value', 'date', 'state']
+        model = InvoiceModel
+        fields = ['provider', 'concept', 'base_value', 'vat', 'total_value', 'date', 'state']
 
     # Validate invoice state
     def validate_state(self, value):

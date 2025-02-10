@@ -2,7 +2,7 @@ from django.db import models
 from InvoicesAccounting.app.enums.invoice_states import InvoiceStates
 from django.core.exceptions import ValidationError
 
-class Invoice(models.Model):
+class InvoiceModel(models.Model):
     provider = models.CharField(max_length=255)
     concept = models.TextField()
     base_value = models.DecimalField(max_digits=10, decimal_places=2)

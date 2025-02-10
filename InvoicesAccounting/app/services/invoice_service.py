@@ -1,9 +1,9 @@
 from typing import List, Dict
-from django.forms import model_to_dict
 import httpx
 from Inmatic import settings
-from InvoicesAccounting.models import Invoice
+from InvoicesAccounting.app.models.invoice_model import InvoiceModel
 from InvoicesAccounting.app.http.requests.validate_invoice import ValidateInvoice
+from django.db import transaction
 
 class InvoiceService:
     BASE_URL = settings.PAYMENT_API_BASE_URL
@@ -16,16 +16,31 @@ class InvoiceService:
 
     def list_invoices(self) -> List[Dict]:
         """
-        Fetch all invoices from the system.
-
-        Returns:
-            list[dict]: A list of invoices.
+        Fetch invoices from the external API, sync them with the database, and return the list.
         """
+        # Fetch invoices from the external API
         response = self.client.get("invoices/list/")
         response.raise_for_status()
-        return response.json()
+        invoices = response.json()  # Get API response
 
-    def create_invoice(self, invoice: Invoice) -> dict:
+        # Validate and normalize using the serializer
+        serializer = ValidateInvoice(data=invoices, many=True)
+        serializer.is_valid(raise_exception=True)  # Enforce strict validation
+
+        # Save only valid invoices to the database inside a transaction
+        with transaction.atomic():
+            for invoice_data in serializer.validated_data:
+                # Use the `id` internally for database operations
+                InvoiceModel.objects.update_or_create(
+                    id=invoice_data.get("id"),  # Use API ID as unique identifier
+                    defaults=invoice_data,  # Use validated serializer data
+                )
+
+        # Return the serializer data (excluding the `id` field)
+        return serializer.data
+
+
+    def create_invoice(self, invoice: InvoiceModel) -> dict:
         """
         Create a new invoice.
 

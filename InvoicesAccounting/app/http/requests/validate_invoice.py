@@ -3,9 +3,24 @@ from InvoicesAccounting.app.enums.invoice_states import InvoiceStates
 from InvoicesAccounting.app.models.invoice_model import InvoiceModel
 
 class ValidateInvoice(serializers.ModelSerializer):
-    base_value = serializers.DecimalField(max_digits=10, decimal_places=2, coerce_to_string=False)
-    vat = serializers.DecimalField(max_digits=10, decimal_places=2, coerce_to_string=False)
-    total_value = serializers.DecimalField(max_digits=10, decimal_places=2, coerce_to_string=False)
+
+    base_value = serializers.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        coerce_to_string=False
+        )
+
+    vat = serializers.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        coerce_to_string=False
+        )
+
+    total_value = serializers.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        coerce_to_string=False
+        )
 
     class Meta:
         model = InvoiceModel

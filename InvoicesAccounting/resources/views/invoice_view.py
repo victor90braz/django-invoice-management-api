@@ -36,9 +36,12 @@ def create_invoice(request):
     """
     Create a new invoice.
     """
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+
     try:
         body = json.loads(request.body)
-        # Validate required fields
+        
         required_fields = ["provider", "concept", "base_value", "vat", "total_value", "date", "state"]
         if not all(field in body for field in required_fields):
             return JsonResponse({"error": "Missing required fields"}, status=400)
@@ -55,9 +58,12 @@ def update_invoice(request, invoice_id):
     """
     Update an existing invoice.
     """
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+
     try:
         body = json.loads(request.body)
-        # Validate required fields
+        
         required_fields = ["provider", "concept", "base_value", "vat", "total_value", "date", "state"]
         if not all(field in body for field in required_fields):
             return JsonResponse({"error": "Missing required fields"}, status=400)
@@ -76,6 +82,9 @@ def delete_invoice(request, invoice_id):
     """
     Delete an invoice by ID.
     """
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+
     try:
         result = InvoiceService().delete_invoice(invoice_id)
         if not result:

@@ -3,38 +3,40 @@ from InvoicesAccounting.app.enums.invoice_states import InvoiceStates
 from django.core.exceptions import ValidationError
 
 class InvoiceModel(models.Model):
-
     provider = models.CharField(max_length=255)
-
     concept = models.TextField()
-
     base_value = models.DecimalField(max_digits=10, decimal_places=2)
-
     vat = models.DecimalField(max_digits=10, decimal_places=2)
-
     total_value = models.DecimalField(max_digits=10, decimal_places=2)
-
     date = models.DateField()
     
     state = models.CharField(
         max_length=20,
-        choices=[(state.value, state.name.capitalize()) for state in InvoiceStates],  
+        choices=InvoiceStates.choices,  
         default=InvoiceStates.DRAFT.value,  
     )
 
     def clean(self):
+        
+        super().clean()  
+
+        errors = {}
 
         if self.base_value <= 0:
-            raise ValidationError({"base_value": "Base value must be greater than zero."})
+            errors["base_value"] = "Base value must be greater than zero."
 
         if self.vat < 0:
-            raise ValidationError({"vat": "VAT cannot be negative."})
+            errors["vat"] = "VAT cannot be negative."
 
         if self.total_value <= 0:
-            raise ValidationError({"total_value": "Total value must be greater than zero."})
+            errors["total_value"] = "Total value must be greater than zero."
 
-        if self.total_value != self.base_value + self.vat:
-            raise ValidationError({"total_value": "Total value must be the sum of base value and VAT."})
+        expected_total = self.base_value + self.vat
+        if self.total_value != expected_total:
+            errors["total_value"] = f"Total value must be {expected_total}."
+
+        if errors:
+            raise ValidationError(errors)
 
     def __str__(self):
-        return f"Invoice {self.id} - {self.provider} ({self.state})"
+        return f"Invoice {self.pk or 'New'} - {self.provider} ({self.state})"

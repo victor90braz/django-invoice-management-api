@@ -18,6 +18,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    
     # Retrieve a list of invoices (GET)
     path("invoices/", list_invoices, name="invoice-list"),
 

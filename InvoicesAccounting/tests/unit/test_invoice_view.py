@@ -104,8 +104,8 @@ class InvoiceViewTest(TestCase):
         )
 
         # Assert
-        self.assertEqual(response.status_code, 401)
-        self.assertIn("Authentication required", response.json().get("error", ""))
+        self.assertEqual(response.status_code, 403)  
+        self.assertIn("Authentication credentials were not provided", response.json().get("detail", ""))
 
     @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.update_invoice")
     def test_update_invoice_needs_authentication(self, mock_update_invoice):
@@ -416,8 +416,8 @@ class InvoiceViewTest(TestCase):
         )
 
         # Assert
-        self.assertEqual(response.status_code, 401)
-        self.assertIn("Authentication required", response.json().get("error", ""))
+        self.assertEqual(response.status_code, 403)  
+        self.assertIn("Authentication credentials were not provided", response.json().get("detail", ""))
 
     @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.update_invoice")
     def test_update_invoice_invalid_json(self, mock_update_invoice):

@@ -14,7 +14,7 @@ from InvoicesAccounting.app.validators.validate_invoice import ValidateInvoice
 
 logger = logging.getLogger(__name__)
 
-# 📌 Swagger Parameters
+# Swagger Parameters
 invoice_id_param = openapi.Parameter(
     'invoice_id', in_=openapi.IN_PATH, description="Invoice ID", type=openapi.TYPE_INTEGER
 )

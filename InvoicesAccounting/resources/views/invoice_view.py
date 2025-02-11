@@ -121,7 +121,6 @@ def generate_accounting_entries(request, invoice_id):
                 ]
             })
 
-        # Fetch from external service
         accounting_entries = InvoiceService().generate_accounting_entries(invoice_id)
 
         if not accounting_entries.get("entries"):  

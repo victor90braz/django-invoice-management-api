@@ -2,8 +2,9 @@ from typing import List, Dict
 import httpx
 from Inmatic import settings
 from InvoicesAccounting.app.models.invoice_model import InvoiceModel
-from InvoicesAccounting.app.http.requests.validate_invoice import ValidateInvoice
 from django.db import transaction
+
+from InvoicesAccounting.app.validators.validate_invoice import ValidateInvoice
 
 
 class InvoiceService:

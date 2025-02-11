@@ -4,10 +4,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from InvoicesAccounting.app.models.invoice_model import InvoiceModel
 from InvoicesAccounting.app.services.invoice_service import InvoiceService
-from InvoicesAccounting.app.http.requests.validate_invoice import ValidateInvoice
+from InvoicesAccounting.app.validators.validate_invoice import ValidateInvoice
 
 logger = logging.getLogger(__name__)
-
 
 @csrf_exempt
 def list_invoices(request):

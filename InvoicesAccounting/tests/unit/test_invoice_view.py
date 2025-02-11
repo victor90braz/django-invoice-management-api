@@ -301,3 +301,88 @@ class InvoiceViewTest(TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIn("An error occurred while creating the invoice", response.json().get("error", ""))
+
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.update_invoice")
+    def test_update_invoice_success(self, mock_update_invoice):
+        # Arrange
+        updated_data = {**self.valid_payload, "concept": "Updated Concept"}
+        mock_update_invoice.return_value = updated_data
+
+        # Act
+        response = self.client.put(
+            reverse('invoice-update', args=[self.invoice.id]),
+            data=json.dumps(updated_data),
+            content_type="application/json"
+        )
+
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["concept"], "Updated Concept")
+
+
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.update_invoice")
+    def test_update_invoice_authentication_required(self, mock_update_invoice):
+        # Arrange
+        self.client.logout()
+
+        # Act
+        response = self.client.put(
+            reverse('invoice-update', args=[self.invoice.id]),
+            data=json.dumps(self.valid_payload),
+            content_type="application/json"
+        )
+
+        # Assert
+        self.assertEqual(response.status_code, 401)
+        self.assertIn("Authentication required", response.json().get("error", ""))
+
+
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.update_invoice")
+    def test_update_invoice_invalid_json(self, mock_update_invoice):
+        # Arrange
+        invalid_json = "invalid json"
+
+        # Act
+        response = self.client.put(
+            reverse('invoice-update', args=[self.invoice.id]),
+            data=invalid_json,
+            content_type="application/json"
+        )
+
+        # Assert
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Invalid JSON", response.json().get("error", ""))
+
+
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.update_invoice")
+    def test_update_invoice_not_found(self, mock_update_invoice):
+        # Arrange
+        mock_update_invoice.return_value = None
+
+        # Act
+        response = self.client.put(
+            reverse('invoice-update', args=[999]),  
+            data=json.dumps(self.valid_payload),
+            content_type="application/json"
+        )
+
+        # Assert
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("Invoice not found", response.json().get("error", ""))
+
+
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.update_invoice")
+    def test_update_invoice_exception_500(self, mock_update_invoice):
+        # Arrange
+        mock_update_invoice.side_effect = Exception("Test exception")
+
+        # Act
+        response = self.client.put(
+            reverse('invoice-update', args=[self.invoice.id]),
+            data=json.dumps(self.valid_payload),
+            content_type="application/json"
+        )
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        self.assertIn("An error occurred while updating the invoice", response.json().get("error", ""))

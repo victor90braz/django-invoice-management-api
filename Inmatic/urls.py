@@ -12,7 +12,6 @@ from InvoicesAccounting.resources.views.invoice_view import (
     generate_accounting_entries,
 )
 
-# ✅ OpenAPI Schema Generation
 schema_view = get_schema_view(
     openapi.Info(
         title="Invoices API",
@@ -26,7 +25,6 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    # ✅ Invoice-related endpoints
     path("invoices/", list_invoices, name="invoice-list"),
     path("invoices/<int:invoice_id>/", get_invoice_detail, name="invoice-detail"),
     path("invoices/create/", create_invoice, name="invoice-create"),
@@ -35,6 +33,5 @@ urlpatterns = [
     path("invoices/filter/", filter_invoices, name="invoice-filter"),
     path("invoices/<int:invoice_id>/accounting-entries/", generate_accounting_entries, name="invoice-accounting-entries"),
     
-    # ✅ Swagger & OpenAPI
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]

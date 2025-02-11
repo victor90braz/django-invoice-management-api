@@ -31,7 +31,6 @@ end_date_param = openapi.Parameter(
     'end_date', in_=openapi.IN_QUERY, description="End date (YYYY-MM-DD)", type=openapi.TYPE_STRING
 )
 
-# ✅ List Invoices (Public)
 @swagger_auto_schema(method='get', responses={200: "List of invoices"})
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -48,7 +47,6 @@ def list_invoices(request):
         logger.error(f"Error listing invoices: {str(e)}")
         return JsonResponse({"error": "An error occurred while listing invoices."}, status=500)
 
-# ✅ Get Invoice Detail (Public)
 @swagger_auto_schema(method='get', manual_parameters=[invoice_id_param], responses={200: "Invoice details"})
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -61,7 +59,6 @@ def get_invoice_detail(request, invoice_id):
         logger.error(f"Error retrieving invoice: {str(e)}")
         return JsonResponse({"error": "An error occurred while retrieving the invoice."}, status=500)
 
-# ✅ Create Invoice (Requires Authentication)
 @swagger_auto_schema(method='post', request_body=ValidateInvoice, responses={201: "Invoice Created"})
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -83,7 +80,6 @@ def create_invoice(request):
         logger.error(f"Error creating invoice: {str(e)}")
         return JsonResponse({"error": "An error occurred while creating the invoice."}, status=500)
 
-# ✅ Update Invoice (Requires Authentication)
 @swagger_auto_schema(method='put', manual_parameters=[invoice_id_param], request_body=ValidateInvoice, responses={200: "Invoice Updated"})
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
@@ -105,7 +101,6 @@ def update_invoice(request, invoice_id):
         logger.error(f"Error updating invoice: {str(e)}")
         return JsonResponse({"error": "An error occurred while updating the invoice."}, status=500)
 
-# ✅ Delete Invoice (Requires Authentication)
 @swagger_auto_schema(method='delete', manual_parameters=[invoice_id_param], responses={200: "Invoice Deleted"})
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
@@ -118,7 +113,6 @@ def delete_invoice(request, invoice_id):
         logger.error(f"Error deleting invoice: {str(e)}")
         return JsonResponse({"error": "An error occurred while deleting the invoice."}, status=500)
 
-# ✅ Filter Invoices (Public)
 @swagger_auto_schema(method='get', manual_parameters=[state_param, start_date_param, end_date_param], responses={200: "Filtered invoices"})
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -151,7 +145,6 @@ def filter_invoices(request):
         logger.error(f"Error filtering invoices: {str(e)}")
         return JsonResponse({"error": "An error occurred while filtering invoices."}, status=500)
 
-# ✅ Generate Accounting Entries (Public)
 @swagger_auto_schema(method='get', manual_parameters=[invoice_id_param], responses={200: "Accounting entries"})
 @api_view(['GET'])
 @permission_classes([AllowAny])

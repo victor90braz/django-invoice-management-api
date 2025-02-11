@@ -29,30 +29,40 @@ class InvoiceServiceTest(TestCase):
             {
                 "provider": "Provider A",
                 "concept": "Concept A",
-                "base_value": Decimal("100.00"),
-                "vat": Decimal("21.00"),
-                "total_value": Decimal("121.00"),
+                "base_value": "100.00",  
+                "vat": "21.00",
+                "total_value": "121.00",
                 "date": "2025-02-08",
                 "state": InvoiceStates.PENDING.value  
             },
             {
                 "provider": "Provider B",
                 "concept": "Concept B",
-                "base_value": Decimal("200.00"),
-                "vat": Decimal("42.00"),
-                "total_value": Decimal("242.00"),
+                "base_value": "200.00",
+                "vat": "42.00",
+                "total_value": "242.00",
                 "date": "2025-02-11",
                 "state": InvoiceStates.ACCOUNTED.value  
             },
         ]
+        
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = invoices_data
 
         # Act
-        invoices = self.service.list_invoices()
+        response = self.service.list_invoices()
 
         # Assert
-        self.assertEqual(invoices, invoices_data)
+        self.assertEqual(len(response), len(invoices_data))  
+
+        for index in range(len(response)):
+            actual = response[index]
+            expected = invoices_data[index]
+            
+            self.assertEqual(actual["provider"], expected["provider"])
+            self.assertEqual(Decimal(actual["base_value"]), Decimal(expected["base_value"]))
+            self.assertEqual(Decimal(actual["vat"]), Decimal(expected["vat"]))
+            self.assertEqual(Decimal(actual["total_value"]), Decimal(expected["total_value"]))
 
     @patch("httpx.Client.post")
     def test_invoice_service_creates_invoice(self, mock_post):

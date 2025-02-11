@@ -258,7 +258,6 @@ class InvoiceViewTest(TestCase):
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["error"], "Invoice not found")
 
-
     @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.generate_accounting_entries")
     def test_generate_accounting_entries_success(self, mock_generate_accounting_entries):
         # Arrange
@@ -342,7 +341,6 @@ class InvoiceViewTest(TestCase):
         
         mock_generate_accounting_entries.assert_called_once_with(invoice_id)
 
-
     @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.list_invoices")
     def test_simulate_an_exception_500_in_list_invoices(self, mock_list_invoices):
         # Arrange
@@ -405,7 +403,6 @@ class InvoiceViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["concept"], "Updated Concept")
 
-
     @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.update_invoice")
     def test_update_invoice_authentication_required(self, mock_update_invoice):
         # Arrange
@@ -421,7 +418,6 @@ class InvoiceViewTest(TestCase):
         # Assert
         self.assertEqual(response.status_code, 401)
         self.assertIn("Authentication required", response.json().get("error", ""))
-
 
     @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.update_invoice")
     def test_update_invoice_invalid_json(self, mock_update_invoice):
@@ -439,7 +435,6 @@ class InvoiceViewTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("Invalid JSON", response.json().get("error", ""))
 
-
     @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.update_invoice")
     def test_update_invoice_not_found(self, mock_update_invoice):
         # Arrange
@@ -455,7 +450,6 @@ class InvoiceViewTest(TestCase):
         # Assert
         self.assertEqual(response.status_code, 404)
         self.assertIn("Invoice not found", response.json().get("error", ""))
-
 
     @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.update_invoice")
     def test_update_invoice_exception_500(self, mock_update_invoice):

@@ -285,3 +285,19 @@ class InvoiceViewTest(TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIn("An error occurred while retrieving the invoice", response.json().get("error", ""))
+
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.create_invoice")
+    def test_create_invoice_exception_500(self, mock_create_invoice):
+        # Arrange
+        mock_create_invoice.side_effect = Exception("Test exception")
+
+        # Act
+        response = self.client.post(
+            reverse('invoice-create'),
+            data=json.dumps(self.valid_payload),
+            content_type="application/json"
+        )
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        self.assertIn("An error occurred while creating the invoice", response.json().get("error", ""))

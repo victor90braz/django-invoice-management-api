@@ -2,6 +2,7 @@ from unittest.mock import patch
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth.models import User
+from InvoicesAccounting.app.enums.accounting_codes import AccountingCodes
 from InvoicesAccounting.app.enums.invoice_states import InvoiceStates
 from InvoicesAccounting.app.models.invoice_model import InvoiceModel
 import json
@@ -256,6 +257,38 @@ class InvoiceViewTest(TestCase):
         # Assert
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["error"], "Invoice not found")
+
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.generate_accounting_entries")
+    def test_generate_accounting_entries_success(self, mock_generate_accounting_entries):
+        # Arrange
+        expected_response = {
+            "entries": [
+                {
+                    "account": AccountingCodes.PURCHASES.value, 
+                    "description": AccountingCodes.PURCHASES.label,  
+                    "amount": float(self.invoice.base_value) 
+                },
+                {
+                    "account": AccountingCodes.VAT_SUPPORTED.value, 
+                    "description": AccountingCodes.VAT_SUPPORTED.label, 
+                    "amount": float(self.invoice.vat)  
+                },
+                {
+                    "account": AccountingCodes.SUPPLIERS.value, 
+                    "description": AccountingCodes.SUPPLIERS.label,  
+                    "amount": float(self.invoice.total_value) 
+                }
+            ]
+        }
+
+        mock_generate_accounting_entries.return_value = expected_response
+
+        # Act
+        response = self.client.get(reverse("invoice-accounting-entries", args=[self.invoice.id]))
+
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), expected_response)
 
     @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.list_invoices")
     def test_simulate_an_exception_500_in_list_invoices(self, mock_list_invoices):

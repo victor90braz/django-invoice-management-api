@@ -248,8 +248,8 @@ class InvoiceViewTest(TestCase):
 
     @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.generate_accounting_entries")
     def test_generate_accounting_entries_not_found(self, mock_generate_accounting_entries):
-        # Arrange
-        mock_generate_accounting_entries.return_value = None
+        # Arrange: Ensure the mock returns a valid structure but empty entries
+        mock_generate_accounting_entries.return_value = {"entries": []}
 
         # Act
         response = self.client.get(reverse('invoice-accounting-entries', args=[999])) 
@@ -257,6 +257,7 @@ class InvoiceViewTest(TestCase):
         # Assert
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json()["error"], "Invoice not found")
+
 
     @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.generate_accounting_entries")
     def test_generate_accounting_entries_success(self, mock_generate_accounting_entries):
@@ -290,6 +291,58 @@ class InvoiceViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), expected_response)
 
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.generate_accounting_entries")
+    def test_generate_accounting_entries_from_external_service(self, mock_generate_accounting_entries):
+        # Arrange
+        non_existing_invoice_id = 999
+
+        expected_response = {
+            "entries": [
+                {
+                    "account": AccountingCodes.PURCHASES.value,
+                    "description": AccountingCodes.PURCHASES.label,
+                    "amount": 150.00
+                },
+                {
+                    "account": AccountingCodes.VAT_SUPPORTED.value,
+                    "description": AccountingCodes.VAT_SUPPORTED.label,
+                    "amount": 30.00
+                },
+                {
+                    "account": AccountingCodes.SUPPLIERS.value,
+                    "description": AccountingCodes.SUPPLIERS.label,
+                    "amount": 180.00
+                }
+            ]
+        }
+
+        mock_generate_accounting_entries.return_value = expected_response
+
+        # Act
+        response = self.client.get(reverse('invoice-accounting-entries', args=[non_existing_invoice_id]))
+
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), expected_response)
+        mock_generate_accounting_entries.assert_called_once_with(non_existing_invoice_id) 
+
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.generate_accounting_entries")
+    def test_generate_accounting_entries_external_service_failure(self, mock_generate_accounting_entries):
+        # Arrange
+        mock_generate_accounting_entries.side_effect = Exception("External service error")
+
+        invoice_id = 999  
+
+        # Act
+        response = self.client.get(reverse('invoice-accounting-entries', args=[invoice_id]))
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        self.assertIn("An error occurred while generating accounting entries", response.json().get("error", ""))
+        
+        mock_generate_accounting_entries.assert_called_once_with(invoice_id)
+
+
     @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.list_invoices")
     def test_simulate_an_exception_500_in_list_invoices(self, mock_list_invoices):
         # Arrange
@@ -298,7 +351,7 @@ class InvoiceViewTest(TestCase):
         mock_list_invoices.side_effect = Exception("Test exception")
 
         # Act
-        response = self.client.get(reverse("invoice-list"))  # Updated URL name
+        response = self.client.get(reverse("invoice-list")) 
 
         # Assert
         self.assertEqual(response.status_code, 500)  

@@ -162,25 +162,25 @@ class InvoiceServiceTest(TestCase):
         # Arrange
         invoice_id = 1
         accounting_entries_data = [
-            {"code": AccountingCodes.PURCHASES, "description": "DEBE Compras", "amount": Decimal("100.00")},
-            {"code": AccountingCodes.VAT_SUPPORTED, "description": "DEBE IVA Soportado", "amount": Decimal("21.00")},
-            {"code": AccountingCodes.SUPPLIERS, "description": "HABER Proveedores", "amount": Decimal("121.00")},
+            {"account": AccountingCodes.PURCHASES.value, "description": "DEBE Compras", "amount": Decimal("100.00")},
+            {"account": AccountingCodes.VAT_SUPPORTED.value, "description": "DEBE IVA Soportado", "amount": Decimal("21.00")},
+            {"account": AccountingCodes.SUPPLIERS.value, "description": "HABER Proveedores", "amount": Decimal("121.00")},
         ]
         mock_get.return_value.status_code = 200
-        mock_get.return_value.json.return_value = accounting_entries_data
+        mock_get.return_value.json.return_value = accounting_entries_data 
 
         # Act
         entries = self.service.generate_accounting_entries(invoice_id)
 
         # Assert
-        self.assertEqual(entries, accounting_entries_data)
-        self.assertEqual(len(entries), 3)
-        self.assertEqual(entries[0]["code"], AccountingCodes.PURCHASES)
-        self.assertEqual(entries[0]["description"], "DEBE Compras")
-        self.assertEqual(entries[0]["amount"], Decimal("100.00"))
-        self.assertEqual(entries[1]["code"], AccountingCodes.VAT_SUPPORTED)
-        self.assertEqual(entries[1]["description"], "DEBE IVA Soportado")
-        self.assertEqual(entries[1]["amount"], Decimal("21.00"))
-        self.assertEqual(entries[2]["code"], AccountingCodes.SUPPLIERS)
-        self.assertEqual(entries[2]["description"], "HABER Proveedores")
-        self.assertEqual(entries[2]["amount"], Decimal("121.00"))
+        self.assertEqual(entries["entries"], accounting_entries_data)
+        self.assertEqual(len(entries["entries"]), 3)
+        self.assertEqual(entries["entries"][0]["account"], AccountingCodes.PURCHASES.value)
+        self.assertEqual(entries["entries"][0]["description"], "DEBE Compras")
+        self.assertEqual(entries["entries"][0]["amount"], float(Decimal("100.00")))
+        self.assertEqual(entries["entries"][1]["account"], AccountingCodes.VAT_SUPPORTED.value)
+        self.assertEqual(entries["entries"][1]["description"], "DEBE IVA Soportado")
+        self.assertEqual(entries["entries"][1]["amount"], float(Decimal("21.00")))
+        self.assertEqual(entries["entries"][2]["account"], AccountingCodes.SUPPLIERS.value)
+        self.assertEqual(entries["entries"][2]["description"], "HABER Proveedores")
+        self.assertEqual(entries["entries"][2]["amount"], float(Decimal("121.00")))

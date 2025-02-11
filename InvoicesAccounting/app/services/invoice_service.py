@@ -72,4 +72,20 @@ class InvoiceService:
         response = self.client.get(f"invoices/{invoice_id}/accounting-entries/")
         response.raise_for_status()
 
-        return response.json()
+        external_entries = response.json()
+
+        if isinstance(external_entries, list):
+            entries = external_entries
+        else:
+            entries = external_entries.get("entries", []) 
+
+        return {
+            "entries": [
+                {
+                    "account": entry.get("account", ""),
+                    "description": entry.get("description", ""),
+                    "amount": float(entry.get("amount", 0))
+                } for entry in entries
+            ]
+        }
+

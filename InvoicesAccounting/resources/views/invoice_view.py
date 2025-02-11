@@ -106,31 +106,30 @@ def filter_invoices(request):
         logger.error(f"Error filtering invoices: {str(e)}")
         return JsonResponse({"error": "An error occurred while filtering invoices."}, status=500)
 
+
 @csrf_exempt
 def generate_accounting_entries(request, invoice_id):
     try:
         invoice = InvoiceModel.objects.filter(id=invoice_id).first()
 
-        accounting_entries = {"entries": []}  
-
         if invoice:
-            accounting_entries["entries"] = [
-                {"account": AccountingCodes.PURCHASES.value, "description": AccountingCodes.PURCHASES.label, "amount": float(invoice.base_value)},
-                {"account": AccountingCodes.VAT_SUPPORTED.value, "description": AccountingCodes.VAT_SUPPORTED.label, "amount": float(invoice.vat)},
-                {"account": AccountingCodes.SUPPLIERS.value, "description": AccountingCodes.SUPPLIERS.label, "amount": float(invoice.total_value)}
-            ]
-        else:
-            external_entries = InvoiceService().generate_accounting_entries(invoice_id)
+            return JsonResponse({
+                "entries": [
+                    {"account": AccountingCodes.PURCHASES.value, "description": AccountingCodes.PURCHASES.label, "amount": float(invoice.base_value)},
+                    {"account": AccountingCodes.VAT_SUPPORTED.value, "description": AccountingCodes.VAT_SUPPORTED.label, "amount": float(invoice.vat)},
+                    {"account": AccountingCodes.SUPPLIERS.value, "description": AccountingCodes.SUPPLIERS.label, "amount": float(invoice.total_value)}
+                ]
+            })
 
-            if not external_entries or "error" in external_entries: 
-                return JsonResponse({"error": "Invoice not found"}, status=404)
+        # Fetch from external service
+        accounting_entries = InvoiceService().generate_accounting_entries(invoice_id)
 
-            accounting_entries["entries"] = external_entries  
+        if not accounting_entries.get("entries"):  
+            return JsonResponse({"error": "Invoice not found"}, status=404)
 
         return JsonResponse(accounting_entries)
 
     except Exception as e:
         logger.error(f"Error generating accounting entries: {str(e)}")
         return JsonResponse({"error": "An error occurred while generating accounting entries."}, status=500)
-
 

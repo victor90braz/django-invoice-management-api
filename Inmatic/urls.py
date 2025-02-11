@@ -1,7 +1,7 @@
 from django.urls import path
 from InvoicesAccounting.resources.views.invoice_view import (
     list_invoices,
-    retrieve_invoice,
+    get_invoice_detail,
     create_invoice,
     update_invoice,
     delete_invoice,
@@ -13,8 +13,8 @@ urlpatterns = [
     # Get all invoices
     path("invoices/", list_invoices, name="invoice-list"),
     
-    # Get an invoice by ID
-    path("invoices/<int:invoice_id>/", retrieve_invoice, name="invoice-detail"),
+    # Get an invoice detail by ID
+    path("invoices/<int:invoice_id>/", get_invoice_detail, name="invoice-detail"),
     
     # Create a new invoice
     path("invoices/create/", create_invoice, name="invoice-create"),

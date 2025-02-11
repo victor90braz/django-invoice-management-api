@@ -24,7 +24,7 @@ def list_invoices(request):
 
 
 @csrf_exempt
-def retrieve_invoice(request, invoice_id):
+def get_invoice_detail(request, invoice_id):
     try:
         data = InvoiceService().get_invoice(invoice_id)
         return JsonResponse(data) if data else JsonResponse({"error": "Invoice not found"}, status=404)

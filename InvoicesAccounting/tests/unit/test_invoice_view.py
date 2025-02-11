@@ -492,7 +492,7 @@ class InvoiceViewTest(TestCase):
         self.assertEqual(response.json()[0]["provider"], self.invoice.provider)
 
     @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.filter_invoices")
-    def test_filter_invoices_from_external_service(self, mock_filter_invoices):
+    def test_filter_invoices_by_state_and_date_range(self, mock_filter_invoices):
         # Arrange
         mock_filter_invoices.return_value = [
             {
@@ -507,10 +507,34 @@ class InvoiceViewTest(TestCase):
             }
         ]
 
+        start_date = "2025-02-01"
+        end_date = "2025-02-20"
+
         # Act
-        response = self.client.get(reverse('invoice-filter'), data={"state": InvoiceStates.PAID.value})
+        response = self.client.get(
+            reverse('invoice-filter'),
+            data={
+                "state": InvoiceStates.PAID.value,
+                "start_date": start_date,
+                "end_date": end_date
+            }
+        )
 
         # Assert
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()), 1)
         self.assertEqual(response.json()[0]["provider"], "Provider C")
+
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.filter_invoices")
+    def test_filter_invoices_invalid_state(self, mock_filter_invoices):
+        # Act
+        response = self.client.get(
+            reverse('invoice-filter'),
+            data={"state": "INVALID_STATE"}
+        )
+
+        # Assert
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Invalid state filter", response.json()["error"])
+
+

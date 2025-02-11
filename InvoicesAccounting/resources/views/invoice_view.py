@@ -2,7 +2,9 @@ import json
 import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.dateparse import parse_date
 from InvoicesAccounting.app.enums.accounting_codes import AccountingCodes
+from InvoicesAccounting.app.enums.invoice_states import InvoiceStates
 from InvoicesAccounting.app.models.invoice_model import InvoiceModel
 from InvoicesAccounting.app.services.invoice_service import InvoiceService
 from InvoicesAccounting.app.validators.validate_invoice import ValidateInvoice
@@ -98,14 +100,32 @@ def delete_invoice(request, invoice_id):
 @csrf_exempt
 def filter_invoices(request):
     try:
-        filters = request.GET.dict()
+        filters = {}
+
+        state = request.GET.get("state")
+        if state and state not in InvoiceStates.values:
+            return JsonResponse({"error": "Invalid state filter. Allowed values: " + ", ".join(InvoiceStates.values)}, status=400)
+
+        if state:
+            filters["state"] = state
+
+        start_date = request.GET.get("start_date")
+        end_date = request.GET.get("end_date")
+
+        if start_date and end_date:
+            start_date = parse_date(start_date)
+            end_date = parse_date(end_date)
+
+            if start_date and end_date:
+                filters["date__range"] = (start_date, end_date)
+
         filtered_data = InvoiceService().filter_invoices(**filters)
+
         return JsonResponse(filtered_data, safe=False)
 
     except Exception as e:
         logger.error(f"Error filtering invoices: {str(e)}")
         return JsonResponse({"error": "An error occurred while filtering invoices."}, status=500)
-
 
 @csrf_exempt
 def generate_accounting_entries(request, invoice_id):

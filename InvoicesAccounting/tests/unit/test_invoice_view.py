@@ -466,3 +466,51 @@ class InvoiceViewTest(TestCase):
         # Assert
         self.assertEqual(response.status_code, 500)
         self.assertIn("An error occurred while updating the invoice", response.json().get("error", ""))
+
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.filter_invoices")
+    def test_filter_invoices_from_database(self, mock_filter_invoices):
+        # Arrange
+        mock_filter_invoices.return_value = [
+            {
+                "id": self.invoice.id,
+                "provider": self.invoice.provider,
+                "concept": self.invoice.concept,
+                "base_value": str(self.invoice.base_value),
+                "vat": str(self.invoice.vat),
+                "total_value": str(self.invoice.total_value),
+                "date": str(self.invoice.date),
+                "state": self.invoice.state,
+            }
+        ]
+
+        # Act
+        response = self.client.get(reverse('invoice-filter'), data={"state": InvoiceStates.PENDING.value})
+
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()), 1)
+        self.assertEqual(response.json()[0]["provider"], self.invoice.provider)
+
+    @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.filter_invoices")
+    def test_filter_invoices_from_external_service(self, mock_filter_invoices):
+        # Arrange
+        mock_filter_invoices.return_value = [
+            {
+                "id": 999,
+                "provider": "Provider C",
+                "concept": "Service C",
+                "base_value": "300.00",
+                "vat": "60.00",
+                "total_value": "360.00",
+                "date": "2025-02-15",
+                "state": InvoiceStates.PAID.value,
+            }
+        ]
+
+        # Act
+        response = self.client.get(reverse('invoice-filter'), data={"state": InvoiceStates.PAID.value})
+
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()), 1)
+        self.assertEqual(response.json()[0]["provider"], "Provider C")

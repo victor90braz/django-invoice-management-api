@@ -65,7 +65,6 @@ class InvoiceService:
     def filter_invoices(self, **params) -> List[Dict]:
         response = self.client.get("invoices/filter/", params=params)
         response.raise_for_status()
-
         return response.json()
 
     def generate_accounting_entries(self, invoice_id: int) -> Dict:

@@ -153,19 +153,57 @@ class InvoiceServiceTest(TestCase):
 
     @patch("httpx.Client.get")
     def test_invoice_service_filters_invoices(self, mock_get):
+        
         # Arrange
-        filter_params = {"provider": "Provider A"}
+        filter_params = {
+            "state": InvoiceStates.PENDING.value, 
+            "start_date": "2025-02-01", 
+            "end_date": "2025-02-10"
+        }
+        
         filtered_invoices_data = [
-            {"id": 1, "provider": "Provider A", "total_value": Decimal("100.00")},
+            {
+                "id": 1,
+                "provider": "Provider A",
+                "concept": "Service A",
+                "base_value": "100.00",
+                "vat": "21.00",
+                "total_value": "121.00",
+                "date": "2025-02-05",
+                "state": InvoiceStates.PENDING.value,
+            },
+            {
+                "id": 2,
+                "provider": "Provider B",
+                "concept": "Service B",
+                "base_value": "150.00",
+                "vat": "31.50",
+                "total_value": "181.50",
+                "date": "2025-02-07",
+                "state": InvoiceStates.PENDING.value,
+            },
         ]
+
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = filtered_invoices_data
 
         # Act
-        invoices = self.service.filter_invoices(**filter_params)
+        response = self.service.filter_invoices(**filter_params)
 
         # Assert
-        self.assertEqual(invoices, filtered_invoices_data)
+        self.assertEqual(len(response), len(filtered_invoices_data))
+
+        for index, actual in enumerate(response):
+            expected = filtered_invoices_data[index]
+
+            self.assertEqual(actual["id"], expected["id"])
+            self.assertEqual(actual["provider"], expected["provider"])
+            self.assertEqual(actual["concept"], expected["concept"])
+            self.assertEqual(actual["state"], expected["state"])
+            self.assertEqual(Decimal(actual["base_value"]), Decimal(expected["base_value"]))
+            self.assertEqual(Decimal(actual["vat"]), Decimal(expected["vat"]))
+            self.assertEqual(Decimal(actual["total_value"]), Decimal(expected["total_value"]))
+            self.assertEqual(actual["date"], expected["date"])
 
     @patch("httpx.Client.get")
     def test_invoice_service_generates_accounting_entries(self, mock_get):

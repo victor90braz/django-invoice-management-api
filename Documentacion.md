@@ -10,14 +10,13 @@ Este proyecto sigue el patrón **Modelo-Vista (MVT)** de Django, y se integra co
   - He decidio crear una aplicación por ser mi primera vez trabajando con python. He podido implementar las ideas mencionadas abajo y integrarme mejor con Django. 
   - [https://github.com/victor90braz/django-invoice-management-api](https://github.com/victor90braz/django-invoice-management-api)
     
+  ## API Documentation REDOC - Disponible en formato pdf en el file (OpenAPI.pdf)
+
+  ![API Docs](public/images/open-api-redoc-dashboard.png)
+  
   ## Test Coverage Report
 
   ![API Docs](public/images/test-coverage-report.png)
-
-  ## API Documentation REDOC
-  - Disponible en formato pdf en el file (OpenAPI.pdf)
-
-  ![API Docs](public/images/open-api-redoc-dashboard.png)
 
 ## **Sumario de Componentes y Decisiones Clave:**
 

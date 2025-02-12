@@ -67,6 +67,7 @@ Generate an HTML report:
 ```bash
 python -m coverage html
 ```
+## Test Coverage Report
 
 ![Test Coverage Report](public/images/test-coverage-report.png)
 
@@ -98,7 +99,7 @@ python -m coverage html
     # API Documentation UI
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
-    # API Documentation redoc
+# API Documentation REDOC   
 
 ![API Docs](public/images/open-api-redoc-dashboard.png)
 

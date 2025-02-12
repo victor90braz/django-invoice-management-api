@@ -50,12 +50,12 @@ python manage.py runserver
 ### 7. **Access the Django Admin Panel**  
 `http://127.0.0.1:8000/admin`.
 
-### 8. **how to run the unit Testings**  
+### 8. **How to run the unit Testings**  
 ```bash
 python manage.py test InvoicesAccounting.tests.unit
 ```
 
-### 9. **how to run Test Coverage**  
+### 9. **How to run Test Coverage**  
 ```bash
 python -m coverage run manage.py test InvoicesAccounting.tests.unit
 ```  

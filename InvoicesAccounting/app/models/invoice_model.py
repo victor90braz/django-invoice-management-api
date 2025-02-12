@@ -1,6 +1,7 @@
 from django.db import models
 from InvoicesAccounting.app.enums.invoice_states import InvoiceStates
 from django.core.exceptions import ValidationError
+from datetime import date 
 
 class InvoiceModel(models.Model):
     provider = models.CharField(max_length=255)
@@ -8,7 +9,7 @@ class InvoiceModel(models.Model):
     base_value = models.DecimalField(max_digits=10, decimal_places=2)
     vat = models.DecimalField(max_digits=10, decimal_places=2)
     total_value = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateField(null=True, blank=True)  
+    date = models.DateField(null=False, blank=False, default=date.today)  
     
     state = models.CharField(
         max_length=20,

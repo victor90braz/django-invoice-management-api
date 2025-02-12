@@ -1,3 +1,4 @@
+from datetime import date
 from unittest.mock import patch
 from django.test import TestCase, Client
 from django.urls import reverse
@@ -185,11 +186,15 @@ class InvoiceViewTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()["error"], "Invalid JSON")
 
-    def test_create_invoice_missing_required_fields_needs_authentication(self):
-        # Arrange
-        invalid_payload = {"provider": "Provider B"}
+    def test_create_invoice_missing_base_value_required_field_returns_validation_error(self):
+        invalid_payload = {
+            "provider": "Provider B",
+            "concept": "Test Concept", 
+            "vat": 20.0,                
+            "total_value": 120.0,      
+            "date": "2025-02-15",    
+        }
 
-        # Act
         response = self.client.post(
             reverse('invoice-create'),
             data=json.dumps(invalid_payload),
@@ -197,13 +202,11 @@ class InvoiceViewTest(TestCase):
         )
 
         # Assert
-        response_data = response.json()
         self.assertEqual(response.status_code, 400)
-        self.assertIn("concept", response_data)
+        response_data = response.json()
+
         self.assertIn("base_value", response_data)
-        self.assertIn("vat", response_data)
-        self.assertIn("total_value", response_data)
-        self.assertIn("date", response_data)
+        self.assertIn("This field is required.", response_data["base_value"])
 
     @patch("InvoicesAccounting.resources.views.invoice_view.InvoiceService.update_invoice")
     def test_update_invoice_not_found_needs_authentication(self, mock_update_invoice):

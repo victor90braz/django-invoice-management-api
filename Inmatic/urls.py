@@ -1,5 +1,6 @@
 from django.urls import path
 from drf_yasg.views import get_schema_view
+from django.contrib import admin  # Import admin from django.contrib
 from .config.api_config import SWAGGER_SCHEMA_CONFIG 
 
 from InvoicesAccounting.resources.views.invoice_view import (
@@ -19,6 +20,8 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     
+    path('admin/', admin.site.urls),  
+
     # Retrieve a list of invoices (GET)
     path("invoices/", list_invoices, name="invoice-list"),
 

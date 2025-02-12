@@ -80,6 +80,7 @@ def create_invoice(request):
         logger.error(f"Error creating invoice: {str(e)}")
         return JsonResponse({"error": "An error occurred while creating the invoice."}, status=500)
 
+
 @swagger_auto_schema(method='put', manual_parameters=[invoice_id_param], request_body=ValidateInvoice, responses={200: "Invoice Updated"})
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])

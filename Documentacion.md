@@ -6,6 +6,18 @@
 
 Este proyecto sigue el patrón **Modelo-Vista (MVT)** de Django, y se integra con una API para gestionar las facturas.
 
+- **Demo-Github**:
+  - He decidio crear una aplicación por ser mi primera vez trabajando con python. He podido implementar las ideas mencionadas abajo y integrarme mejor con Django. 
+  - [Aplicacion Gestión de Facturas API](https://github.com/victor90braz/django-invoice-management-api)
+    
+  ## Test Coverage Report
+
+  ![API Docs](public/images/test-coverage-report.png)
+
+  ## API Documentation REDOC
+
+  ![API Docs](public/images/open-api-redoc-dashboard.png)
+
 ## **Sumario de Componentes y Decisiones Clave:**
 
 - **Modelo MVT (Django):** Implementación del patrón Modelo-Vista-Template, separando las responsabilidades. Los templates irán ser la próxima feature.
@@ -24,23 +36,12 @@ Este proyecto sigue el patrón **Modelo-Vista (MVT)** de Django, y se integra co
 
 ## **Links relacionados:**
 
-- **Github**:
-  - [Aplicacion Gestión de Facturas API](https://github.com/victor90braz/django-invoice-management-api)
-
 - **Entender mejor el porqué de los códigos contables**:
   - [Contabilizar IVA - Defeza Asesores](https://defezasesores.es/blog/contable/contabilizar-iva/)
   
 - **Útil para implementar Swagger**:
   - [Generación automática de especificaciones Swagger](https://swagger.io/blog/api-development/automatically-generating-swagger-specifications-wi/)
-
-  ## Test Coverage Report
-
-  ![API Docs](public/images/test-coverage-report.png)
-
-  ## API Documentation REDOC
-
-  ![API Docs](public/images/open-api-redoc-dashboard.png)
-
+  
 ---
 
 ### **`urls.py`**

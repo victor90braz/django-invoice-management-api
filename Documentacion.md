@@ -20,6 +20,9 @@ Este proyecto sigue el patrón **Modelo-Vista (MVT)** de Django, y se integra co
 
 ## **Links relacionados:**
 
+- **Github**:
+  - [Aplicacion Gestión de Facturas API](https://github.com/victor90braz/django-invoice-management-api)
+
 - **Entender mejor el porqué de los códigos contables**:
   - [Contabilizar IVA - Defeza Asesores](https://defezasesores.es/blog/contable/contabilizar-iva/)
   
@@ -104,3 +107,9 @@ El `InvoiceStates` es un `enum` que define los posibles estados de una factura d
 - **`PENDING:`** `"PENDING"` — Pendiente.
 
 ---
+
+---
+
+#### **InvoiceStates**
+**Testings >> CONTEXTO**  
+He implementado un conjunto de pruebas unitarias para asegurar el correcto funcionamiento de cada componente en el sistema. Estas pruebas cubren tanto los happy paths como los edge cases para verificar que el servicio maneja correctamente todas las situaciones posibles.

@@ -8,7 +8,7 @@ Este proyecto sigue el patrón **Modelo-Vista (MVT)** de Django, y se integra co
 
 - **Demo-Github**:
   - He decidio crear una aplicación por ser mi primera vez trabajando con python. He podido implementar las ideas mencionadas abajo y integrarme mejor con Django. 
-  - [Aplicacion Gestión de Facturas API](https://github.com/victor90braz/django-invoice-management-api)
+  - [https://github.com/victor90braz/django-invoice-management-api](https://github.com/victor90braz/django-invoice-management-api)
     
   ## Test Coverage Report
 
@@ -41,7 +41,7 @@ Este proyecto sigue el patrón **Modelo-Vista (MVT)** de Django, y se integra co
   
 - **Útil para implementar Swagger**:
   - [Generación automática de especificaciones Swagger](https://swagger.io/blog/api-development/automatically-generating-swagger-specifications-wi/)
-  
+
 ---
 
 ### **`urls.py`**

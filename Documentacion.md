@@ -33,6 +33,14 @@ Este proyecto sigue el patrón **Modelo-Vista (MVT)** de Django, y se integra co
 - **Útil para implementar Swagger**:
   - [Generación automática de especificaciones Swagger](https://swagger.io/blog/api-development/automatically-generating-swagger-specifications-wi/)
 
+  ## Test Coverage Report
+
+  ![API Docs](public/images/test-coverage-report.png)
+
+  ## API Documentation REDOC
+
+  ![API Docs](public/images/open-api-redoc-dashboard.png)
+
 ---
 
 ### **`urls.py`**

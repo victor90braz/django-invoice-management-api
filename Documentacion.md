@@ -15,6 +15,7 @@ Este proyecto sigue el patrón **Modelo-Vista (MVT)** de Django, y se integra co
   ![API Docs](public/images/test-coverage-report.png)
 
   ## API Documentation REDOC
+  - Disponible en formato pdf en el file (OpenAPI.pdf)
 
   ![API Docs](public/images/open-api-redoc-dashboard.png)
 

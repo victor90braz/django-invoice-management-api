@@ -54,8 +54,6 @@ python manage.py runserver
 ```bash
 python manage.py test InvoicesAccounting.tests.unit
 ```
-![alt text](image.png)
-
 
 ### 9. **how to run Test Coverage**  
 ```bash
@@ -70,7 +68,7 @@ Generate an HTML report:
 python -m coverage html
 ```
 
-![alt text](image-1.png)
+![Test Coverage Report](public/images/test-coverage-report.png)
 
 ## Features
 

@@ -1,3 +1,7 @@
+Aquí tienes el **README.md** corregido con los puntos adicionales que me solicitaste:
+
+---
+
 # Proyecto de Gestión de Facturas API
 
 Este proyecto sigue el patrón **Modelo-Vista (MVT)** de Django, y se integra con una API para gestionar las facturas.
@@ -108,8 +112,12 @@ El `InvoiceStates` es un `enum` que define los posibles estados de una factura d
 
 ---
 
----
-
 #### **InvoiceStates**
 **Testings >> CONTEXTO**  
-He implementado un conjunto de pruebas unitarias para asegurar el correcto funcionamiento de cada componente en el sistema. Estas pruebas cubren tanto los happy paths como los edge cases para verificar que el servicio maneja correctamente todas las situaciones posibles.
+He implementado un conjunto de pruebas unitarias para asegurar el correcto funcionamiento de del SERVICE y de la VIEW. 
+
+- **`HAPPY PATHS:`** — Pruebas de flujos donde el servicio y las vistas funcionan correctamente, como la creación, lectura, actualización y eliminación de facturas con datos válidos.
+
+- **`EDGE CASES:`** — Pruebas de situaciones inesperadas o de borde, como datos inválidos, autenticación fallida o intentos de acceder a facturas no existentes.
+
+

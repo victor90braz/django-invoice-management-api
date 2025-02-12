@@ -187,7 +187,7 @@ def generate_accounting_entries(request, invoice_id):
 
         accounting_entries = InvoiceService().generate_accounting_entries(invoice_id)
 
-        if not accounting_entries.get("entries"):  
+        if not accounting_entries.get("entries"):
             return JsonResponse({"error": "Invoice not found"}, status=404)
 
         return JsonResponse(accounting_entries)
@@ -195,3 +195,4 @@ def generate_accounting_entries(request, invoice_id):
     except Exception as e:
         logger.error(f"Error generating accounting entries: {str(e)}")
         return JsonResponse({"error": "An error occurred while generating accounting entries."}, status=500)
+

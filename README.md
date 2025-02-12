@@ -104,3 +104,14 @@ The `clean()` method in `InvoiceModel` performs the following checks:
 - `base_value` must be greater than zero.
 - `vat` must not be negative.
 - `total_value` must match the sum of `base_value` and `vat`.
+
+## Test Coverage Report
+
+![API Docs](public/images/test-coverage-report.png)
+
+## API Documentation REDOC
+
+![API Docs](public/images/open-api-redoc-dashboard.png)
+
+
+

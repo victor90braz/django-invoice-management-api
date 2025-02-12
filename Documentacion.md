@@ -1,8 +1,8 @@
-Aquí tienes el **README.md** corregido con los puntos adicionales que me solicitaste:
+# Requisitos Parte 1
+- Proyecto de Gestión de Facturas API
+- Prueba Técnica: Diseño de API REST de Contabilización de Facturas
 
----
-
-# Proyecto de Gestión de Facturas API
+## Introdución de la documentación
 
 Este proyecto sigue el patrón **Modelo-Vista (MVT)** de Django, y se integra con una API para gestionar las facturas.
 

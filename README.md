@@ -1,163 +1,134 @@
-# Invoice managements
+# Django Invoice Management API
 
-A Django-based invoice management API to create, update, delete, and manage invoices and related services.
+Django Invoice Management API for managing invoices and related services.
 
 ## Setup Instructions
-
-Follow the steps below to set up and run the project locally.
-
-### 1. **Clone the Repository**
-Clone the project to your local machine:
 ```bash
 git clone https://github.com/victor90braz/django-invoice-management-api.git
+```
+
+```bash
 cd Inmatic
 ```
 
-### 2. **Set Up the Virtual Environment**
-If you haven't set up a virtual environment yet, do so by running:
+ **Set Up the Virtual Environment**  
 ```bash
 python -m venv venv
 ```
 
 Activate the virtual environment:
 
-- **Windows**:
+- **Windows**:  
   ```bash
   venv\Scripts\activate
   ```
-
-- **Mac/Linux**:
+- **Mac/Linux**:  
   ```bash
   source venv/bin/activate
   ```
 
-### 3. **Install Dependencies**
-Install the required dependencies using `pip`:
+### 3. **Install Dependencies**  
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. **Create and Apply Migrations**
-After setting up the environment and installing dependencies, apply the migrations to set up the database schema:
+### 4. **Create and Apply Migrations**  
 ```bash
 python manage.py migrate
 ```
 
-### 5. **Create a Superuser**
-To access the Django admin, you'll need to create a superuser:
+### 5. **Create a Superuser**  
 ```bash
 python manage.py createsuperuser
 ```
-Follow the prompts to enter the superuser's username, email, and password.
 
-### 6. **Run the Development Server**
-Start the development server to run the project locally:
+### 6. **Run the Development Server**  
 ```bash
 python manage.py runserver
 ```
-Access the project at `http://127.0.0.1:8000/` in your browser.
 
-### 7. **Access the Django Admin Panel**
-Once the server is running, you can access the admin panel at `http://127.0.0.1:8000/admin`. 
+### 7. **Access the Django Admin Panel**  
+`http://127.0.0.1:8000/admin`.
 
-### 8. **Testing the Project**
-Run the tests to ensure everything is working as expected:
+### 8. **how to run the unit Testings**  
 ```bash
 python manage.py test InvoicesAccounting.tests.unit
 ```
+![alt text](image.png)
 
-### 9. **Test Coverage**
-Run tests with coverage:
+
+### 9. **how to run Test Coverage**  
 ```bash
 python -m coverage run manage.py test InvoicesAccounting.tests.unit
-```
-Generate a report:
+```  
+Generate a report:  
 ```bash
 python -m coverage report
-```
-Generate an HTML report (optional):
+```  
+Generate an HTML report:  
 ```bash
 python -m coverage html
 ```
 
----
+![alt text](image-1.png)
 
 ## Features
 
-- Create, update, and delete invoices.
-- Filter invoices based on state and date range.
-- Generate accounting entries for invoices.
+    path('admin/', admin.site.urls),  
 
----
+    # Retrieve a list of invoices (GET)
+    path("invoices/", list_invoices, name="invoice-list"),
+
+    # Retrieve details of a specific invoice (GET)
+    path("invoices/<int:invoice_id>/", get_invoice_detail, name="invoice-detail"),
+
+    # Create a new invoice (POST)
+    path("invoices/create/", create_invoice, name="invoice-create"),
+
+    # Update an existing invoice (PUT)
+    path("invoices/<int:invoice_id>/update/", update_invoice, name="invoice-update"),
+
+    # Delete an invoice (DELETE)
+    path("invoices/<int:invoice_id>/delete/", delete_invoice, name="invoice-delete"),
+
+    # Filter invoices based on query parameters (GET)
+    path("invoices/filter/", filter_invoices, name="invoice-filter"),
+
+    # Generate accounting entries for an invoice (GET)
+    path("invoices/<int:invoice_id>/accounting-entries/", generate_accounting_entries, name="invoice-accounting-entries"),
+
+    # API Documentation UI
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+
+    # API Documentation redoc
+
+![API Docs](public/images/open-api-redoc-dashboard.png)
 
 ## Validation and Serializer
 
-### 1. **Validation Rules in the View**
-In the view handling the invoice creation, we apply validation rules using Django’s `Model.clean()` method. This method checks if the data is valid and raises validation errors when needed. Additionally, in the serializer, custom validation checks are done.
+### Validation in the View
 
-Here's how the validation works:
+In the view, when creating an invoice, we validate the request data using a serializer. If required fields like `date`, `base_value`, `vat`, or `total_value` are missing or invalid, a validation error is raised.
 
-- When the `POST` request is made to create an invoice, the data is first validated by the `ValidateInvoice` serializer.
-- If the `base_value`, `vat`, or `total_value` is missing or invalid, the serializer raises a validation error.
-- The `date` field is explicitly required. If it is missing or invalid, a `ValidationError` is raised with a relevant message.
+### Serializer Workflow
 
-### 2. **How the Serializer Works**
-The `ValidateInvoice` serializer uses Django’s `ModelSerializer` to automatically generate fields based on the `InvoiceModel` fields. Here's how it works:
+- The `ValidateInvoice` serializer validates incoming data. If invalid, it returns errors.
+- The model’s `clean()` method is also called for further validation, ensuring `base_value`, `vat`, and `total_value` are correct.
 
-- **Model Fields**: All fields defined in the `InvoiceModel` are automatically included in the serializer.
-- **Validation**: In the `validate` method, custom validation is applied to ensure the `date` field is provided and that the `base_value` and `vat` are non-negative. The model’s `clean()` method is called to handle additional validations like checking if `total_value` matches the sum of `base_value` and `vat`.
-  
-  ```python
-  def validate(self, data):
-      if 'date' not in data or not data['date']:
-          raise serializers.ValidationError({'date': 'This field is required.'})
+### Model's `clean()` Method
 
-      invoice = InvoiceModel(**data)
-      try:
-          invoice.clean()  
-      except ValidationError as e:
-          raise serializers.ValidationError(e.message_dict)
-
-      return data
-  ```
-
-### 3. **Model's `clean()` Method**
-- The `InvoiceModel`'s `clean()` method checks if the `base_value` is greater than zero, the `vat` is non-negative, and the `total_value` is valid. If any of these conditions fail, the method raises a `ValidationError`.
-
-```python
-def clean(self):
-    errors = {}
-
-    if self.base_value <= 0:
-        errors["base_value"] = "Base value must be greater than zero."
-
-    if self.vat < 0:
-        errors["vat"] = "VAT cannot be negative."
-
-    if self.total_value <= 0:
-        errors["total_value"] = "Total value must be greater than zero."
-
-    expected_total = self.base_value + self.vat
-    if self.total_value != expected_total:
-        errors["total_value"] = f"Total value must be {expected_total}."
-
-    if errors:
-        raise ValidationError(errors)
-```
-
-### 4. **Example Flow**:
-- When a `POST` request is made to create an invoice:
-  1. The serializer first validates the incoming data. 
-  2. The `validate()` method ensures the `date` is present and checks other business rules.
-  3. If the data is valid, the `InvoiceModel` is created or updated.
+The `clean()` method in `InvoiceModel` checks the following:
+- `base_value` must be greater than zero.
+- `vat` must not be negative.
+- `total_value` must match the sum of `base_value` and `vat`.
 
 ---
 
 ## Troubleshooting
 
-- **Missing Migrations**: If you face issues related to migrations, run `python manage.py makemigrations` and then `python manage.py migrate` again.
-
-- **Admin Panel Not Accessible**: Ensure you created the superuser correctly. If you encounter a `404` error when accessing the admin, double-check your URL configuration in `urls.py`.
+- **Missing Migrations**: Run `python manage.py makemigrations` and `python manage.py migrate` again if you face issues.
+- **Admin Panel Not Accessible**: Ensure you've created the superuser correctly. Double-check `urls.py` if needed.
 
 ---
 
+Let me know if this looks good!

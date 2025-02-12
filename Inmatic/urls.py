@@ -1,7 +1,7 @@
 from django.urls import path
 from drf_yasg.views import get_schema_view
-from django.contrib import admin  # Import admin from django.contrib
-from .config.api_config import SWAGGER_SCHEMA_CONFIG 
+from django.contrib import admin  
+from .config.api_config import OPEN_API_SCHEMA_CONFIG 
 
 from InvoicesAccounting.resources.views.invoice_view import (
     list_invoices,
@@ -14,7 +14,7 @@ from InvoicesAccounting.resources.views.invoice_view import (
 )
 
 schema_view = get_schema_view(
-    SWAGGER_SCHEMA_CONFIG,
+    OPEN_API_SCHEMA_CONFIG,
     public=True,
 )
 

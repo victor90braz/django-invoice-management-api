@@ -52,8 +52,31 @@ def list_invoices(request):
 @permission_classes([AllowAny])
 def get_invoice_detail(request, invoice_id):
     try:
+        invoice = InvoiceModel.objects.filter(id=invoice_id).first()
+
+        if invoice:
+            data = {
+                "id": invoice.id,
+                "provider": invoice.provider,
+                "concept": invoice.concept,
+                "base_value": str(invoice.base_value),
+                "vat": str(invoice.vat),
+                "total_value": str(invoice.total_value),
+                "date": str(invoice.date),
+                "state": invoice.state,
+            }
+            return JsonResponse(data)
+        
         data = InvoiceService().get_invoice(invoice_id)
-        return JsonResponse(data) if data else JsonResponse({"error": "Invoice not found"}, status=404)
+        if data:
+            return JsonResponse(data)
+
+        return JsonResponse({"error": "Invoice not found"}, status=404)
+
+    except Exception as e:
+        logger.error(f"Error retrieving invoice: {str(e)}")
+        return JsonResponse({"error": "An error occurred while retrieving the invoice."}, status=500)
+
 
     except Exception as e:
         logger.error(f"Error retrieving invoice: {str(e)}")

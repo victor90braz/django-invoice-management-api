@@ -8,7 +8,7 @@ class InvoiceModel(models.Model):
     base_value = models.DecimalField(max_digits=10, decimal_places=2)
     vat = models.DecimalField(max_digits=10, decimal_places=2)
     total_value = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateField()
+    date = models.DateField(null=True, blank=True)  
     
     state = models.CharField(
         max_length=20,

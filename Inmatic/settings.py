@@ -1,15 +1,18 @@
 import os
 from pathlib import Path
-from dotenv import load_dotenv 
+from dotenv import load_dotenv
 
+# Load environment variables from .env file
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-kn057$k-djtrd7-+ewdd%wby^31fb4ovgw68-5uzb9yn6gl!ys')
+# Load SECRET_KEY and DEBUG from .env, with default values if not set
+SECRET_KEY = os.getenv('SECRET_KEY', 'your-default-secret-key')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+# Load ALLOWED_HOSTS from .env and split into a list
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -43,9 +46,9 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'templates'),  
-            os.path.join(BASE_DIR, 'Inmatic', 'templates'),  
-            os.path.join(BASE_DIR, 'InvoicesAccounting', 'templates'),  
+            os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'Inmatic', 'templates'),
+            os.path.join(BASE_DIR, 'InvoicesAccounting', 'templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -63,8 +66,12 @@ WSGI_APPLICATION = 'Inmatic.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('DB_NAME', 'invoices_db'),
+        'USER': os.getenv('DB_USER', 'root'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'root'),
+        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
+        'PORT': os.getenv('DB_PORT', '3306'),
     }
 }
 
